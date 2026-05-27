@@ -36,7 +36,16 @@ export const AuthProvider = ({ children }) => {
         return data
     }
 
-    const signOut = () => {}
+    const signOut = async () => {
+        const { error } = supabase.auth.signOut()
+
+        if (error) {
+            alert("Sign out failed", error.message)
+            console.log("User sign out failed", error.message)
+        }
+
+        return null
+    }
 
 
     return (
