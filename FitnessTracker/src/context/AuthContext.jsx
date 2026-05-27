@@ -1,13 +1,40 @@
 import { createContext, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 const AuthContext = createContext({})
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null)
 
-    const login = () => {}
+    const signUp = async (email, password) => {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password
+        })
 
-    const signUp = () => {}
+        if (error) {
+            alert("Sign up failed", error.message)
+            console.log("User sign up failed", error.message)
+            return null
+        }
+
+        return data
+    }
+
+    const login = async (email, password) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        })
+
+        if (error) {
+            alert("Login failed", error.message)
+            console.log("User login failed", error.message)
+            return null
+        }
+
+        return data
+    }
 
     const signOut = () => {}
 
