@@ -4,12 +4,49 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
+  Alert
 } from "react-native";
 
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import Button from "../../components/Button";
+import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function SignUp() {
+
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false);
+
+  const { signUp } = useAuth()
+
+  const handleSignUp = async () => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    const result = await signUp(email, password);
+    setLoading(false);
+
+    if (result) {
+      Alert.alert("Success", "Account created successfully");
+      router.push("/");
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
@@ -23,21 +60,27 @@ export default function SignUp() {
         placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry
+        value={password}
+        onChangeText={setPassword}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
         secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
       />
 
-      <Button title="Sign Up" />
+      <Button title="Sign Up" onPress={handleSignUp}/>
 
       <Link href="/login" asChild>
         <Pressable>
