@@ -1,10 +1,26 @@
-import { createContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 const AuthContext = createContext({})
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                setUser(null)
+            } else if (session) {
+                setUser(session.user)
+            }
+            setLoading(false)
+        })
+
+        return () => {
+            subscription.unsubscribe()
+        }
+    }, [])
 
     const signUp = async (email, password) => {
         const { data, error } = await supabase.auth.signUp({
@@ -47,10 +63,10 @@ export const AuthProvider = ({ children }) => {
 
 
     return (
-        <AuthContext.Provider value={{ user, login, signUp, signOut }}>
+        <AuthContext.Provider value={{ user, loading, login, signUp, signOut }}>
             {children}
         </AuthContext.Provider>
     )
 }
 
-export const useAuth = () => createContext(AuthContext)
+export const useAuth = () => useContext(AuthContext)
