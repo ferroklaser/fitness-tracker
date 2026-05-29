@@ -3,4 +3,4 @@ __pycache__/
 *.pyc
 venv/
 
-**/init__.py
+**/__init__.py
