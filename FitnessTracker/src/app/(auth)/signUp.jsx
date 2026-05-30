@@ -4,12 +4,50 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
+  Alert
 } from "react-native";
 
-import { Link } from "expo-router";
-import Button from "../../components/Button";
+import { Link, router } from "expo-router";
+import MyButton from "../../components/MyButton";
+import MyTextInput from "../../components/MyTextInput";
+import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function SignUp() {
+
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false);
+
+  const { signUp } = useAuth()
+
+  const handleSignUp = async () => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    const result = await signUp(email, password);
+    setLoading(false);
+
+    if (result) {
+      Alert.alert("Success", "Account created successfully");
+      router.replace("/");
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
@@ -18,26 +56,32 @@ export default function SignUp() {
         Start tracking your fitness progress today
       </Text>
 
-      <TextInput
-        style={styles.input}
+      <MyTextInput
+        style={{ marginBottom: 14 }}
         placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
       />
 
-      <TextInput
-        style={styles.input}
+      <MyTextInput
+        style={{ marginBottom: 14 }}
         placeholder="Password"
         secureTextEntry
+        value={password}
+        onChangeText={setPassword}
       />
 
-      <TextInput
-        style={styles.input}
+      <MyTextInput
+        style={{ marginBottom: 14 }}
         placeholder="Confirm Password"
         secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
       />
 
-      <Button title="Sign Up" />
+      <MyButton title="Sign Up" onPress={handleSignUp}/>
 
       <Link href="/login" asChild>
         <Pressable>
@@ -70,16 +114,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6B7280",
     marginBottom: 32,
-  },
-
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 14,
-    fontSize: 16,
   },
 
   footer: {
