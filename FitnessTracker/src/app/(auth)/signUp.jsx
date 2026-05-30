@@ -8,7 +8,8 @@ import {
 } from "react-native";
 
 import { Link, router } from "expo-router";
-import Button from "../../components/Button";
+import MyButton from "../../components/MyButton";
+import MyTextInput from "../../components/MyTextInput";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -55,8 +56,8 @@ export default function SignUp() {
         Start tracking your fitness progress today
       </Text>
 
-      <TextInput
-        style={styles.input}
+      <MyTextInput
+        style={{ marginBottom: 14 }}
         placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
@@ -64,23 +65,23 @@ export default function SignUp() {
         onChangeText={setEmail}
       />
 
-      <TextInput
-        style={styles.input}
+      <MyTextInput
+        style={{ marginBottom: 14 }}
         placeholder="Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
-      <TextInput
-        style={styles.input}
+      <MyTextInput
+        style={{ marginBottom: 14 }}
         placeholder="Confirm Password"
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
 
-      <Button title="Sign Up" onPress={handleSignUp}/>
+      <MyButton title="Sign Up" onPress={handleSignUp}/>
 
       <Link href="/login" asChild>
         <Pressable>
@@ -113,16 +114,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6B7280",
     marginBottom: 32,
-  },
-
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 14,
-    fontSize: 16,
   },
 
   footer: {

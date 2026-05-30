@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 import { Link, router } from "expo-router";
-import Button from "../../components/Button";
+import MyButton from "../../components/Button";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -61,7 +61,7 @@ export default function Login() {
         onChangeText={setPassword}
       />
 
-      <Button title="Log In" onPress={handleLogin}/>
+      <MyButton title="Log In" onPress={handleLogin}/>
 
       <Link href="/signUp" asChild>
         <Pressable>

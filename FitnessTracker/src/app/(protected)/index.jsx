@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-import Button from "../../components/Button";
+import MyButton from "../../components/MyButton";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Index() {
@@ -18,7 +18,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Text>Edit src/app/index.tsx to edit this screen.</Text>
-      <Button title={"sign out"} onPress={handleSignOut}/>
+      <MyButton title={"sign out"} onPress={handleSignOut}/>
     </View>
   );
 }
