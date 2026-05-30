@@ -2,9 +2,9 @@ import 'react-native-url-polyfill'
 import { createClient } from '@supabase/supabase-js'
 import 'expo-sqlite/localStorage/install';
 
-export const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_API_KEY,
+export const supabase = createClient( 
+    process.env.EXPO_PUBLIC_SUPABASE_URL,
+    process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
         auth: {
             storage: localStorage,

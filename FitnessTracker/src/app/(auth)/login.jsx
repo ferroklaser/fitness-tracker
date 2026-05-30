@@ -4,12 +4,38 @@ import {
   TextInput,
   StyleSheet,
   Pressable,
+  Alert
 } from "react-native";
 
-import { Link } from "expo-router";
-import Button from "../../components/Button";
+import { Link, router } from "expo-router";
+import MyButton from "../../components/Button";
+import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  
+  const { login } = useAuth()
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    setLoading(true)
+    const result = await login(email, password)
+    setLoading(false)
+
+    if (result) {
+      Alert.alert("Success", "Account signed in successfully");
+      router.replace("/");
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back</Text>
@@ -23,15 +49,19 @@ export default function Login() {
         placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry
+        value={password}
+        onChangeText={setPassword}
       />
 
-      <Button title="Log In" />
+      <MyButton title="Log In" onPress={handleLogin}/>
 
       <Link href="/signUp" asChild>
         <Pressable>
