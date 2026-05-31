@@ -1,6 +1,7 @@
 import os
 
-from openai import AsyncOpenAI
+# from openai import AsyncOpenAI
+from google import genai
 
 from app.ai.prompts import SYSTEM_PROMPT, build_user_prompt
 
@@ -13,25 +14,34 @@ async def generate_progress_report(
     workouts: list[dict],
     calories: list[dict],
 ) -> str:
-    api_key = os.getenv("OPENAI_API_KEY")
+
+    api_key = os.getenv("GEMINI_API_KEY")
+
     if not api_key:
-        raise AIEngineError("OPENAI_API_KEY is not configured.")
+        raise AIEngineError("GEMINI_API_KEY is not configured.")
 
-    client = AsyncOpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    client = genai.Client(api_key=api_key)
 
-    response = await client.chat.completions.create(
-        model=model,
-        temperature=0.4,
-        max_tokens=500,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": build_user_prompt(workouts, calories)},
-        ],
-    )
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
-    content = response.choices[0].message.content
-    if not content:
-        raise AIEngineError("OpenAI returned an empty response.")
+    prompt = f"""
+{SYSTEM_PROMPT}
 
-    return content.strip()
+{build_user_prompt(workouts, calories)}
+"""
+
+    try:
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+        )
+
+        content = response.text
+
+        if not content:
+            raise AIEngineError("Gemini returned empty response.")
+
+        return content.strip()
+
+    except Exception as exc:
+        raise AIEngineError(f"Gemini error: {exc}") from exc
