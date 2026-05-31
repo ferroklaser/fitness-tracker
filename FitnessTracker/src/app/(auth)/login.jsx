@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 import { Link, router } from "expo-router";
-import MyButton from "../../components/Button";
+import MyButton from "../../components/MyButton";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
