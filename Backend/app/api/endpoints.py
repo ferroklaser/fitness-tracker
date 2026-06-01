@@ -25,27 +25,15 @@ class InsightResponse(BaseModel):
 
 def get_supabase() -> Client:
     url = os.getenv("EXPO_PUBLIC_SUPABASE_URL")
-    api_key = os.getenv("EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
+    key = os.getenv("EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
 
-    if not url or not api_key:
+    if not url or not key:
         raise HTTPException(
             status_code=500,
             detail="EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY is not configured."
         )
 
-    return cre
-
-def get_supabase_admin() -> Client:
-    url = os.getenv("SUPABASE_URL")
-    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-
-    if not url or not service_key:
-        raise HTTPException(
-            status_code=500,
-            detail="SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not configured.",
-        )
-
-    return create_client(url, service_key)
+    return create_client(url, key)
 
 
 async def get_user_id_from_token(
@@ -121,11 +109,16 @@ def enforce_ai_rate_limit(user_id: str) -> int:
 async def create_insights(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> InsightResponse:
-    supabase = get_supabase_admin()
-    
-    user_id = await get_user_id_from_token(supabase, credentials.credentials)
+    supabase = get_supabase()
+    token = credentials.credentials
+
+    user_id = await get_user_id_from_token(supabase, token=token)
+
+    supabase.postgrest.auth(token)
 
     workouts, calories = fetch_recent_logs(supabase, user_id)
+
+    remaining = enforce_ai_rate_limit(user_id)
 
     if not workouts and not calories:
         return InsightResponse(
@@ -135,8 +128,6 @@ async def create_insights(
             ),
             remaining_requests=remaining,
         )
-
-    remaining = enforce_ai_rate_limit(user_id)
 
     try:
         report = await generate_progress_report(workouts=workouts, calories=calories)
