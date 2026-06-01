@@ -23,6 +23,17 @@ class InsightResponse(BaseModel):
     report: str
     remaining_requests: int
 
+def get_supabase() -> Client:
+    url = os.getenv("EXPO_PUBLIC_SUPABASE_URL")
+    api_key = os.getenv("EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
+
+    if not url or not api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY is not configured."
+        )
+
+    return cre
 
 def get_supabase_admin() -> Client:
     url = os.getenv("SUPABASE_URL")
