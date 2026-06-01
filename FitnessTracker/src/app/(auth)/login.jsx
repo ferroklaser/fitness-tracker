@@ -11,6 +11,7 @@ import { Link, router } from "expo-router";
 import MyButton from "../../components/MyButton";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import MyTextInput from "../../components/MyTextInput";
 
 export default function Login() {
 
@@ -44,7 +45,7 @@ export default function Login() {
         Log in to continue your fitness journey
       </Text>
 
-      <TextInput
+      <MyTextInput
         style={styles.input}
         placeholder="Email"
         keyboardType="email-address"
@@ -53,7 +54,7 @@ export default function Login() {
         onChangeText={setEmail}
       />
 
-      <TextInput
+      <MyTextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry

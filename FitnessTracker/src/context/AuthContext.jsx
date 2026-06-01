@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         })
 
         if (error) {
-            alert("Sign up failed", error.message)
+            alert("Sign up failed")
             console.log("User sign up failed", error.message)
             return null
         }
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
         })
 
         if (error) {
-            alert("Login failed", error.message)
+            alert("Login failed")
             console.log("User login failed", error.message)
             return null
         }
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
         const { error } = await supabase.auth.signOut()
 
         if (error) {
-            alert("Sign out failed", error.message)
+            alert("Sign out failed")
             console.log("User sign out failed", error.message)
         }
     }

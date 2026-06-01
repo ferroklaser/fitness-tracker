@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function Profile() {
   const { profile, updateProfile } = useUser(); // 🧬 Bring down updateProfile to save changes
-  const { user } = useAuth(); 
+  const { user, signOut } = useAuth(); 
 
   // 📝 Local states to handle live input editing fields
   const [isEditing, setIsEditing] = useState(false);
@@ -16,7 +16,7 @@ export default function Profile() {
   const handleSignOut = () => {
     Alert.alert("🚪 Sign Out", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
-      { text: "Log Out", style: "destructive", onPress: () => Alert.alert("Session Cleared") }
+      { text: "Log Out", style: "destructive", onPress: () => signOut() }
     ]);
   };
 
