@@ -8,7 +8,7 @@ import {
 
 export function ActionCard({title, description, emoji, onPress, ... props}) {
     return (
-        <TouchableOpacity style={styles.actionCard} onPress={onPress}>
+        <TouchableOpacity style={[styles.actionCard, props.style]} onPress={onPress} {...props}>
             <View style={styles.cardInfo}>
                 <Text style={styles.cardEmoji}>{emoji}</Text>
                 <View style={styles.textGroup}>
