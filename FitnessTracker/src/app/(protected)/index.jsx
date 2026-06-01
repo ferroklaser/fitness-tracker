@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from "@/context/AuthContext";
+import { ActionCard } from "@/components/ActionCard"
 
 export default function HomeDashboard() {
   const router = useRouter();
@@ -70,39 +71,28 @@ export default function HomeDashboard() {
 
       <Text style={styles.sectionTitle}>Quick Actions</Text>
 
+      
+
       {/* Quick Action Cards */}
-      <TouchableOpacity style={[styles.actionCard, styles.primaryCard]} onPress={() => router.push('/workout/active')}>
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardEmoji}>🏋️‍♂️</Text>
-          <View style={styles.textGroup}>
-            <Text style={[styles.cardTitle, styles.whiteText]}>Start Empty Workout</Text>
-            <Text style={[styles.cardDesc, styles.lightText]}>Log training on the fly</Text>
-          </View>
-        </View>
-        <Text style={styles.arrowIcon}>➔</Text>
-      </TouchableOpacity>
+      <ActionCard
+        title="Start Empty Workout"
+        description="Log training on the fly"
+        emoji="🏋️‍♂️"
+        onPress={() => router.push('/workout/active')} />
+      
+      <ActionCard
+        title="AI Recommendation"
+        description="Custom splits for your goals"
+        emoji="🧠"
+        onPress={() => router.push('/ai-coach')}
+      />
 
-      <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/ai-coach')}>
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardEmoji}>🧠</Text>
-          <View style={styles.textGroup}>
-            <Text style={styles.cardTitle}>AI Recommendation</Text>
-            <Text style={styles.cardDesc}>Custom splits for your goals</Text>
-          </View>
-        </View>
-        <Text style={styles.arrowIconLight}>➔</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/workout/saved')}>
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardEmoji}>📂</Text>
-          <View style={styles.textGroup}>
-            <Text style={styles.cardTitle}>Saved Workouts</Text>
-            <Text style={styles.cardDesc}>Run your template splits</Text>
-          </View>
-        </View>
-        <Text style={styles.arrowIconLight}>➔</Text>
-      </TouchableOpacity>
+      <ActionCard
+        title="Saved Workouts"
+        description="Run your template splits"
+        emoji="📂"
+        onPress={() => router.push('/workout/saved')}
+      />
 
       {/* 📝 Quick Entry Logger */}
       <Text style={styles.sectionTitle}>Quick Entry Logger</Text>
