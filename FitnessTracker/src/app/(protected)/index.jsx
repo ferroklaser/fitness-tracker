@@ -46,7 +46,7 @@ export default function HomeDashboard() {
           <TouchableOpacity style={styles.profileBtn} onPress={() => router.push('/profile')}>
             <Text style={styles.profileText}>Profile</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.logoutBtn} onPress={() => signOut()}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={signOut}>
             <Text style={styles.logoutText}>Log Out</Text>
           </TouchableOpacity>
         </View>
