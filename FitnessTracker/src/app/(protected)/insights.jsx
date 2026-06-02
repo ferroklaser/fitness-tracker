@@ -1,8 +1,7 @@
 // 1. Header: Insights
 // 2. 3 stat cards
-// 3. Line chart card
-// 4. AI report card
-// 5. Generate AI Progress Report button
+// 3. AI report card
+// 4. Generate AI Progress Report button
 
 import React, { useState } from "react";
 import {
@@ -11,12 +10,8 @@ import {
   View,
   ScrollView,
   ActivityIndicator,
-  Dimensions,
 } from "react-native";
-import { LineChart } from "react-native-chart-kit";
-import MyButton from "../../components/MyButton";
-
-const screenWidth = Dimensions.get("window").width;
+import { MyButton } from "../../components/MyButton";
 
 export default function Insights() {
   const [loading, setLoading] = useState(false);
@@ -35,12 +30,13 @@ export default function Insights() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
       <Text style={styles.headerTitle}>Insights</Text>
       <Text style={styles.subtitle}>
         Track your progress and receive AI-powered recommendations.
       </Text>
 
+      {/* 📊 High-Fidelity Stats Row */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>12</Text>
@@ -58,42 +54,7 @@ export default function Insights() {
         </View>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Bench Press Progress</Text>
-        <Text style={styles.cardSubtitle}>
-          Example strength progression over recent weeks.
-        </Text>
-
-        <LineChart
-          data={{
-            labels: ["W1", "W2", "W3", "W4", "W5"],
-            datasets: [
-              {
-                data: [50, 55, 57.5, 60, 65],
-              },
-            ],
-          }}
-          width={screenWidth - 64}
-          height={220}
-          yAxisSuffix="kg"
-          chartConfig={{
-            backgroundColor: "#FFFFFF",
-            backgroundGradientFrom: "#FFFFFF",
-            backgroundGradientTo: "#FFFFFF",
-            decimalPlaces: 0,
-            color: () => "#2563EB",
-            labelColor: () => "#6B7280",
-            propsForDots: {
-              r: "4",
-              strokeWidth: "2",
-              stroke: "#2563EB",
-            },
-          }}
-          bezier
-          style={styles.chart}
-        />
-      </View>
-
+      {/* 🧠 AI Report Action Dashboard Block */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>AI Progress Report</Text>
         <Text style={styles.cardSubtitle}>
@@ -106,12 +67,14 @@ export default function Insights() {
           onPress={handleGenerateReport}
         />
 
+        {/* Dynamic Activity Progress Spinners */}
         {loading && (
           <View style={styles.spinner}>
             <ActivityIndicator size="large" color="#2563EB" />
           </View>
         )}
 
+        {/* AI Stored Output Report Presentation Card */}
         {report && (
           <View style={styles.reportCard}>
             <Text style={styles.reportTitle}>AI Coach Summary</Text>
@@ -198,10 +161,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  chart: {
-    borderRadius: 16,
-  },
-
   spinner: {
     marginTop: 18,
     alignItems: "center",
@@ -229,4 +188,3 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 });
-
