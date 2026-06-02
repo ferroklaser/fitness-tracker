@@ -11,22 +11,28 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { MyButton } from "../../components/MyButton";
+import MyButton from "../../components/MyButton";
+import { fetchAIInsights } from "../../util/fetchAIInsights";
 
 export default function Insights() {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
+  const [remainingReq, setRemainingReq] = useState(null)
+  const [error, setError] = useState(null)
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
     setLoading(true);
     setReport(null);
 
-    setTimeout(() => {
-      setLoading(false);
-      setReport(
-        "You completed 12 workouts this month. Your bench press increased from 50kg to 65kg, showing steady strength progression. Your average calorie intake is around 2100 kcal/day. Recommendation: continue progressive overload and maintain consistent nutrition to support recovery."
-      );
-    }, 1500);
+    try {
+      const data = await fetchAIInsights()
+      setReport(data.report)
+      setRemainingReq(data.remainingReq)
+    } catch (err) {
+      setError(err.message || "An unexpected error occurred.")
+    } finally {
+      setLoading(false)
+    }
   };
 
   return (
@@ -61,6 +67,10 @@ export default function Insights() {
           Generate a personalized summary based on your workout and calorie
           history.
         </Text>
+
+        <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
 
         <MyButton
           title={loading ? "Generating Report..." : "Generate AI Progress Report"}

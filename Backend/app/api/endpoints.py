@@ -58,7 +58,7 @@ def fetch_recent_logs(supabase: Client, user_id: str) -> tuple[list[dict], list[
     try:
         workouts = (
             supabase.table("workout_logs")
-             .select("activity_type, data, created_at")
+             .select("exercise_name, sets, reps, weight, created_at")
             .eq("user_id", user_id)
             .order("created_at", desc=True)
             .limit(20)
@@ -67,8 +67,8 @@ def fetch_recent_logs(supabase: Client, user_id: str) -> tuple[list[dict], list[
         )
 
         calories = (
-            supabase.table("calorie_logs")
-            .select("calories, log_date, created_at")
+            supabase.table("nutrition_logs")
+            .select("calories, meal_type, food_name, created_at")
             .eq("user_id", user_id)
             .order("created_at", desc=True)
             .limit(14)
@@ -142,3 +142,47 @@ async def create_insights(
         report=report,
         remaining_requests=remaining,
     )
+# from fastapi import APIRouter, Depends, HTTPException, Request # 👈 Import Request
+
+
+# @router.post("/insights", response_model=InsightResponse)
+# async def create_insights(
+#     request: Request, # 👈 Inject the raw request object directly
+# ) -> InsightResponse:
+#     supabase = get_supabase()
+    
+#     # 1. Grab the Authorization header manually
+#     auth_header = request.headers.get("Authorization")
+#     print("RAW AUTH HEADER:", auth_header) # This WILL print now!
+
+#     if not auth_header or not auth_header.startswith("Bearer "):
+#         raise HTTPException(
+#             status_code=401, 
+#             detail="Missing or malformed Authorization header."
+#         )
+
+#     # 2. Extract the exact token string
+#     token = auth_header.split(" ")[1]
+#     print("EXTRACTED TOKEN:", token)
+
+#     # 3. Authenticate the user through Supabase
+#     user_id = await get_user_id_from_token(supabase, token=token)
+    
+#     # ... rest of your code remains exactly the same ...
+#     supabase.postgrest.auth(token)
+#     workouts, calories = fetch_recent_logs(supabase, user_id)
+#     remaining = enforce_ai_rate_limit(user_id)
+
+#     if not workouts and not calories:
+#         return InsightResponse(
+#             report="Not enough workout or calorie data yet.",
+#             remaining_requests=remaining,
+#         )
+
+#     try:
+#         report = await generate_progress_report(workouts=workouts, calories=calories)
+#     except Exception as exc:
+#         print("AI Engine Error:", exc)
+#         raise HTTPException(status_code=502, detail=str(exc))
+
+#     return InsightResponse(report=report, remaining_requests=remaining)
