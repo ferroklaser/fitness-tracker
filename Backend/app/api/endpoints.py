@@ -66,6 +66,7 @@ def fetch_recent_logs(supabase: Client, user_id: str) -> tuple[list[dict], list[
             .data
         )
 
+
         calories = (
             supabase.table("nutrition_logs")
             .select("calories, meal_type, food_name, created_at")
