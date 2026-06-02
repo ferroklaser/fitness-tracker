@@ -44,7 +44,7 @@ export default function SignUp() {
 
     if (result) {
       Alert.alert("Success", "Account created successfully");
-      router.replace("/");
+      router.replace("/onboarding");
     }
   }
 

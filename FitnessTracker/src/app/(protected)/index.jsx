@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from "@/context/AuthContext";
+import { ActionCardList } from "@/components/ActionCardList"
+import { EntryLogger } from "@/components/EntryLogger"
+
 
 export default function HomeDashboard() {
   const router = useRouter();
@@ -46,7 +49,7 @@ export default function HomeDashboard() {
           <TouchableOpacity style={styles.profileBtn} onPress={() => router.push('/profile')}>
             <Text style={styles.profileText}>Profile</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.logoutBtn} onPress={() => signOut()}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={signOut}>
             <Text style={styles.logoutText}>Log Out</Text>
           </TouchableOpacity>
         </View>
@@ -66,56 +69,21 @@ export default function HomeDashboard() {
           <Text style={styles.statNumber}>Active</Text>
           <Text style={styles.statLabel}>Engines</Text>
         </View>
-      </View>
-
-      <Text style={styles.sectionTitle}>Quick Actions</Text>
+      </View> 
 
       {/* Quick Action Cards */}
-      <TouchableOpacity style={[styles.actionCard, styles.primaryCard]} onPress={() => router.push('/workout/active')}>
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardEmoji}>🏋️‍♂️</Text>
-          <View style={styles.textGroup}>
-            <Text style={[styles.cardTitle, styles.whiteText]}>Start Empty Workout</Text>
-            <Text style={[styles.cardDesc, styles.lightText]}>Log training on the fly</Text>
-          </View>
-        </View>
-        <Text style={styles.arrowIcon}>➔</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/ai-coach')}>
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardEmoji}>🧠</Text>
-          <View style={styles.textGroup}>
-            <Text style={styles.cardTitle}>AI Recommendation</Text>
-            <Text style={styles.cardDesc}>Custom splits for your goals</Text>
-          </View>
-        </View>
-        <Text style={styles.arrowIconLight}>➔</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/workout/saved')}>
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardEmoji}>📂</Text>
-          <View style={styles.textGroup}>
-            <Text style={styles.cardTitle}>Saved Workouts</Text>
-            <Text style={styles.cardDesc}>Run your template splits</Text>
-          </View>
-        </View>
-        <Text style={styles.arrowIconLight}>➔</Text>
-      </TouchableOpacity>
+      <ActionCardList/>
 
       {/* 📝 Quick Entry Logger */}
-      <Text style={styles.sectionTitle}>Quick Entry Logger</Text>
-      <View style={styles.card}>
-        <TextInput style={styles.input} placeholder="Exercise name..." value={exercise} onChangeText={setExercise} />
-        <View style={styles.row}>
-          <TextInput style={[styles.input, { flex: 1, marginRight: 8 }]} placeholder="Weight (kg)" keyboardType="numeric" value={weight} onChangeText={setWeight} />
-          <TextInput style={[styles.input, { flex: 1 }]} placeholder="Reps" keyboardType="numeric" value={reps} onChangeText={setReps} />
-        </View>
-        <TouchableOpacity style={styles.actionBtn} onPress={handleAddLog}>
-          <Text style={styles.actionBtnText}>Save Log Entry</Text>
-        </TouchableOpacity>
-      </View>
+      <EntryLogger 
+        exercise={exercise}
+        setExercise={setExercise}
+        weight={weight}
+        setWeight={setWeight}
+        reps={reps}
+        setReps={setReps}
+        onPress={handleAddLog}
+      />
 
       <Text style={styles.sectionTitle}>Today's Ledger</Text>
       {logs.map((item) => (
@@ -148,26 +116,8 @@ const styles = StyleSheet.create({
 
   sectionTitle: { fontSize: 11, fontWeight: '800', color: '#888', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, marginTop: 16, paddingLeft: 4 },
 
-  // Action Cards
-  actionCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFF', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 16, padding: 18, marginBottom: 12 },
-  primaryCard: { backgroundColor: '#111', borderColor: '#111' },
-  cardInfo: { flexDirection: 'row', alignItems: 'center', flex: 0.9 },
-  cardEmoji: { fontSize: 26, marginRight: 14 },
-  textGroup: { flex: 1 },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: '#111' },
-  cardDesc: { fontSize: 12, color: '#666', marginTop: 2 },
-  whiteText: { color: '#FFF' },
-  lightText: { color: '#A1A1AA' },
-  arrowIcon: { color: '#FFF', fontSize: 16, fontWeight: '600' },
-  arrowIconLight: { color: '#B1B1B1', fontSize: 16, fontWeight: '600' },
-
   // Logger Form
-  card: { backgroundColor: '#FFF', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#EAEAEA', marginBottom: 24 },
-  input: { backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 8, padding: 12, fontSize: 14, marginBottom: 12, color: '#111' },
-  row: { flexDirection: 'row', marginBottom: 4 },
-  actionBtn: { backgroundColor: '#111', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
-  actionBtnText: { color: '#FFF', fontSize: 14, fontWeight: '700' },
-  historyItem: { backgroundColor: '#FFF', borderRadius: 10, padding: 14, borderWidth: 1, borderColor: '#EAEAEA', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   itemTitle: { fontSize: 14, fontWeight: '700', color: '#111' },
   itemDetails: { fontSize: 13, color: '#666', fontWeight: '500' },
+  historyItem: { backgroundColor: '#FFF', borderRadius: 10, padding: 14, borderWidth: 1, borderColor: '#EAEAEA', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
 });

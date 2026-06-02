@@ -1,9 +1,8 @@
-import { Slot } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { Redirect } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-// 🛠️ DEV BYPASS KEY: Forces the app to let you straight into your dashboard preview
-const IS_DEV_PREVIEW = true;
 
 export default function ProtectedLayout() {
   const { user, isAuthReady } = useAuth();
@@ -12,10 +11,16 @@ export default function ProtectedLayout() {
     return null;
   }
 
-  // If we are designing the UI, ignore the empty user profile and bypass the wall
-  if (!user && !IS_DEV_PREVIEW) {
+  if (!user) {
     return <Redirect href="/login" />;
   }
 
-  return <Slot />;
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{ headerShown: false }}
+      >
+      </Stack>
+    </SafeAreaView>
+  );
 }

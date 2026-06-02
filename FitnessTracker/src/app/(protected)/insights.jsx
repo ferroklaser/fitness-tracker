@@ -193,7 +193,7 @@ export default function Onboarding() {
                 onPress={() => toggleFitnessGoal(option.id)}
               >
                 <View style={[styles.checkboxIndicator, isSelected && styles.checkboxIndicatorActive]}>
-                  {isSelected && <Text style={styles.checkmarkIconText}>✓</Text>}
+                  {isSelected ? <Text style={styles.checkmarkIconText}>✓</Text> : null}
                 </View>
                 <Text style={[styles.checkboxLabelText, isSelected && styles.checkboxLabelTextActive]}>
                   {option.label}
