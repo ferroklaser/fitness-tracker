@@ -1,274 +1,232 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useUser } from '../../context/UserContext'; // 🌐 1. Import our custom memory cloud hook
+// 1. Header: Insights
+// 2. 3 stat cards
+// 3. Line chart card
+// 4. AI report card
+// 5. Generate AI Progress Report button
 
-export default function Onboarding() {
-  const router = useRouter();
-  const { updateProfile } = useUser(); // 🧬 2. Pull down the data-updating executor function
-  
-  // Onboarding Form States
-  const [gender, setGender] = useState('male');
-  const [age, setAge] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [bodyFat, setBodyFat] = useState('');
-  const [experience, setExperience] = useState('beginner');
-  const [targetWeight, setTargetWeight] = useState('');
-  const [activityLevel, setActivityLevel] = useState('lightlyActive');
-  const [selectedGoals, setSelectedGoals] = useState([]);
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  ActivityIndicator,
+  Dimensions,
+} from "react-native";
+import { LineChart } from "react-native-chart-kit";
+import MyButton from "../../components/MyButton";
 
-  const fitnessGoalsOptions = [
-    { id: 'weightLoss', label: 'Weight Loss (Fat loss / Toning)' },
-    { id: 'muscleGain', label: 'Muscle Gain (Hypertrophy / Bulking)' },
-    { id: 'endurance', label: 'Improve Endurance (Run longer/faster)' },
-    { id: 'strength', label: 'Get Stronger (Strength/Powerlifting)' },
-    { id: 'health', label: 'Improve Health (General wellness / Feel better)' },
-  ];
+const screenWidth = Dimensions.get("window").width;
 
-  const activityOptions = [
-    { id: 'sedentary', label: 'Sedentary', desc: 'Desk job / little to no exercise', multiplier: 1.2 },
-    { id: 'lightlyActive', label: 'Lightly Active', desc: 'Light exercise (1-2 days/week)', multiplier: 1.375 },
-    { id: 'moderatelyActive', label: 'Moderately Active', desc: 'Moderate exercise (3-4 days/week)', multiplier: 1.55 },
-    { id: 'veryActive', label: 'Very Active', desc: 'Hard labor / heavy sport (5+ days/week)', multiplier: 1.725 },
-  ];
+export default function Insights() {
+  const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState(null);
 
-  const toggleFitnessGoal = (goalId) => {
-    if (selectedGoals.includes(goalId)) {
-      setSelectedGoals(selectedGoals.filter(id => id !== goalId));
-    } else {
-      setSelectedGoals([...selectedGoals, goalId]);
-    }
-  };
+  const handleGenerateReport = () => {
+    setLoading(true);
+    setReport(null);
 
-  const showAlert = (title, message) => {
-    if (Platform.OS === 'web') {
-      window.alert(`${title}: ${message}`);
-    } else {
-      Alert.alert(title, message);
-    }
-  };
-
-  const handleSaveGoals = () => {
-    if (!age || !weight || !height || !targetWeight) {
-      showAlert("Missing Fields", "Please complete all mandatory parameters to compute your targets.");
-      return;
-    }
-
-    if (selectedGoals.length === 0) {
-      showAlert("Goal Missing", "Please select at least one fitness path goal strategy.");
-      return;
-    }
-
-    // 🧮 Smart BMR Calorie Calculation
-    let wNum = parseFloat(weight);
-    let hNum = parseFloat(height);
-    let aNum = parseInt(age);
-    
-    let bmr = (10 * wNum) + (6.25 * hNum) - (5 * aNum);
-    bmr = gender === 'male' ? bmr + 5 : bmr - 161;
-
-    const activeObj = activityOptions.find(opt => opt.id === activityLevel) || activityOptions[1];
-    let baseCalories = Math.round(bmr * activeObj.multiplier);
-
-    selectedGoals.forEach((goalId) => {
-      if (goalId === 'muscleGain') baseCalories += 350;
-      if (goalId === 'weightLoss') baseCalories -= 400;
-      if (goalId === 'strength') baseCalories += 150;
-      if (goalId === 'endurance') baseCalories += 200;
-    });
-
-    // 💾 SAVE ACTION TO GLOBAL CONTEXT
-    updateProfile({
-      gender,
-      age,
-      weight,
-      height,
-      bodyFat,
-      experience,
-      targetWeight,
-      activityLevel,
-      selectedGoals,
-      computedCalories: baseCalories
-    });
-
-    showAlert("🎯 Profile Configured!", `Daily energy intake target established at ${baseCalories} kcal.`);
-    router.replace('/');
+    setTimeout(() => {
+      setLoading(false);
+      setReport(
+        "You completed 12 workouts this month. Your bench press increased from 50kg to 65kg, showing steady strength progression. Your average calorie intake is around 2100 kcal/day. Recommendation: continue progressive overload and maintain consistent nutrition to support recovery."
+      );
+    }, 1500);
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.headerTitle}>Establish Goals</Text>
-      <Text style={styles.subtitle}>Configure your profile statistics to calibrate our tracking engines.</Text>
+      <Text style={styles.headerTitle}>Insights</Text>
+      <Text style={styles.subtitle}>
+        Track your progress and receive AI-powered recommendations.
+      </Text>
+
+      <View style={styles.statsRow}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>12</Text>
+          <Text style={styles.statLabel}>Workouts</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>65kg</Text>
+          <Text style={styles.statLabel}>Best Lift</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>2100</Text>
+          <Text style={styles.statLabel}>Avg Calories</Text>
+        </View>
+      </View>
 
       <View style={styles.card}>
-        {/* Gender */}
-        <Text style={styles.labelTitle}>Biological Gender</Text>
-        <View style={styles.toggleButtonGroup}>
-          {['male', 'female'].map((g) => (
-            <TouchableOpacity 
-              key={g}
-              style={[styles.toggleButton, gender === g && styles.toggleButtonActive]}
-              onPress={() => setGender(g)}
-            >
-              <Text style={[styles.toggleButtonText, gender === g && styles.toggleButtonTextActive]}>
-                {g.charAt(0).toUpperCase() + g.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <Text style={styles.cardTitle}>Bench Press Progress</Text>
+        <Text style={styles.cardSubtitle}>
+          Example strength progression over recent weeks.
+        </Text>
 
-        {/* Biometrics */}
-        <Text style={styles.sectionHeading}>Current Metrics</Text>
-        <View style={styles.inputRow}>
-          <TextInput 
-            style={[styles.input, { flex: 1, marginRight: 8 }]} 
-            placeholder="Age" 
-            keyboardType="numeric"
-            value={age}
-            onChangeText={setAge}
-          />
-          <TextInput 
-            style={[styles.input, { flex: 1, marginRight: 8 }]} 
-            placeholder="Weight (kg)" 
-            keyboardType="numeric"
-            value={weight}
-            onChangeText={setWeight}
-          />
-          <TextInput 
-            style={[styles.input, { flex: 1 }]} 
-            placeholder="Height (cm)" 
-            keyboardType="numeric"
-            value={height}
-            onChangeText={setHeight}
-          />
-        </View>
+        <LineChart
+          data={{
+            labels: ["W1", "W2", "W3", "W4", "W5"],
+            datasets: [
+              {
+                data: [50, 55, 57.5, 60, 65],
+              },
+            ],
+          }}
+          width={screenWidth - 64}
+          height={220}
+          yAxisSuffix="kg"
+          chartConfig={{
+            backgroundColor: "#FFFFFF",
+            backgroundGradientFrom: "#FFFFFF",
+            backgroundGradientTo: "#FFFFFF",
+            decimalPlaces: 0,
+            color: () => "#2563EB",
+            labelColor: () => "#6B7280",
+            propsForDots: {
+              r: "4",
+              strokeWidth: "2",
+              stroke: "#2563EB",
+            },
+          }}
+          bezier
+          style={styles.chart}
+        />
+      </View>
 
-        {/* Body Fat */}
-        <Text style={styles.labelTitle}>Body Fat Percentage (Optional)</Text>
-        <TextInput 
-          style={styles.input} 
-          placeholder="e.g. 14.5 (%)" 
-          keyboardType="numeric"
-          value={bodyFat}
-          onChangeText={setBodyFat}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>AI Progress Report</Text>
+        <Text style={styles.cardSubtitle}>
+          Generate a personalized summary based on your workout and calorie
+          history.
+        </Text>
+
+        <MyButton
+          title={loading ? "Generating Report..." : "Generate AI Progress Report"}
+          onPress={handleGenerateReport}
         />
 
-        {/* Activity Level */}
-        <Text style={styles.labelTitle}>Daily Activity Level</Text>
-        <View style={styles.activityGroupStack}>
-          {activityOptions.map((option) => {
-            const isActive = activityLevel === option.id;
-            return (
-              <TouchableOpacity
-                key={option.id}
-                style={[styles.activityCardButton, isActive && styles.activityCardButtonActive]}
-                onPress={() => setActivityLevel(option.id)}
-              >
-                <View style={styles.activityTextContainer}>
-                  <Text style={[styles.activityLabelText, isActive && styles.activityLabelTextActive]}>
-                    {option.label}
-                  </Text>
-                  <Text style={styles.activityDescText}>
-                    {option.desc}
-                  </Text>
-                </View>
-                <View style={[styles.radioIndicator, isActive && styles.radioIndicatorActive]}>
-                  {isActive && <View style={styles.radioInnerCircle} />}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        {loading && (
+          <View style={styles.spinner}>
+            <ActivityIndicator size="large" color="#2563EB" />
+          </View>
+        )}
 
-        {/* Fitness Paths */}
-        <Text style={styles.labelTitle}>Fitness Path Targets (Select Multiple)</Text>
-        <View style={styles.checkboxGroupStack}>
-          {fitnessGoalsOptions.map((option) => {
-            const isSelected = selectedGoals.includes(option.id);
-            return (
-              <TouchableOpacity 
-                key={option.id}
-                style={[styles.checkboxRowButton, isSelected && styles.checkboxRowButtonActive]}
-                onPress={() => toggleFitnessGoal(option.id)}
-              >
-                <View style={[styles.checkboxIndicator, isSelected && styles.checkboxIndicatorActive]}>
-                  {isSelected ? <Text style={styles.checkmarkIconText}>✓</Text> : null}
-                </View>
-                <Text style={[styles.checkboxLabelText, isSelected && styles.checkboxLabelTextActive]}>
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* Experience Level */}
-        <Text style={styles.labelTitle}>Current Experience Level</Text>
-        <View style={styles.toggleButtonGroup}>
-          {['beginner', 'intermediate', 'advanced'].map((level) => (
-            <TouchableOpacity 
-              key={level}
-              style={[styles.toggleButton, experience === level && styles.toggleButtonActive]}
-              onPress={() => setExperience(level)}
-            >
-              <Text style={[styles.toggleButtonText, experience === level && styles.toggleButtonTextActive]}>
-                {level.charAt(0).toUpperCase() + level.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Weight Target Objective */}
-        <Text style={styles.labelTitle}>Target Weight Objective</Text>
-        <TextInput 
-          style={styles.input} 
-          placeholder="Desired Weight Target (kg)" 
-          keyboardType="numeric"
-          value={targetWeight}
-          onChangeText={setTargetWeight}
-        />
-
-        <TouchableOpacity style={styles.submitButton} onPress={handleSaveGoals}>
-          <Text style={styles.submitButtonText}>Save & Compute Calorie Blueprint</Text>
-        </TouchableOpacity>
+        {report && (
+          <View style={styles.reportCard}>
+            <Text style={styles.reportTitle}>AI Coach Summary</Text>
+            <Text style={styles.reportText}>{report}</Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#FAFAFA', padding: 20, paddingVertical: 32 },
-  headerTitle: { fontSize: 26, fontWeight: '800', color: '#111111' },
-  subtitle: { fontSize: 13, color: '#888888', marginTop: 4, marginBottom: 20, lineHeight: 18 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#EAEAEA' },
-  sectionHeading: { fontSize: 11, fontWeight: '800', color: '#888888', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 },
-  labelTitle: { fontSize: 12, fontWeight: '700', color: '#444444', marginBottom: 8, marginTop: 10 },
-  input: { backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: '#EAEAEA', borderRadius: 8, padding: 12, fontSize: 14, marginBottom: 12, color: '#111111' },
-  inputRow: { flexDirection: 'row', marginBottom: 4 },
-  toggleButtonGroup: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  toggleButton: { flex: 1, backgroundColor: '#F5F5F5', paddingVertical: 10, borderRadius: 8, alignItems: 'center', marginHorizontal: 2, borderWidth: 1, borderColor: '#EAEAEA' },
-  toggleButtonActive: { backgroundColor: '#111111', borderColor: '#111111' },
-  toggleButtonText: { fontSize: 11, color: '#666666', fontWeight: '600' },
-  toggleButtonTextActive: { color: '#FFFFFF', fontWeight: '700' },
-  activityGroupStack: { marginBottom: 14 },
-  activityCardButton: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: '#EAEAEA', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginBottom: 6 },
-  activityCardButtonActive: { backgroundColor: '#F8FAFC', borderColor: '#111111', borderWidth: 1.5 },
-  activityTextContainer: { flex: 0.9 },
-  activityLabelText: { fontSize: 13, fontWeight: '600', color: '#334155' },
-  activityLabelTextActive: { color: '#111111', fontWeight: '700' },
-  activityDescText: { fontSize: 11, color: '#64748B', marginTop: 2 },
-  radioIndicator: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: '#CBD5E1', backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' },
-  radioIndicatorActive: { borderColor: '#111111' },
-  radioInnerCircle: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#111111' },
-  checkboxGroupStack: { marginBottom: 12 },
-  checkboxRowButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F5F5F5', padding: 12, borderRadius: 8, marginBottom: 6, borderWidth: 1, borderColor: '#EAEAEA' },
-  checkboxRowButtonActive: { backgroundColor: '#F0FDF4', borderColor: '#22C55E' },
-  checkboxIndicator: { width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: '#CBD5E1', marginRight: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' },
-  checkboxIndicatorActive: { backgroundColor: '#22C55E', borderColor: '#22C55E' },
-  checkmarkIconText: { color: '#FFFFFF', fontSize: 11, fontWeight: 'bold' },
-  checkboxLabelText: { fontSize: 13, color: '#334155', fontWeight: '500' },
-  checkboxLabelTextActive: { color: '#166534', fontWeight: '600' },
-  submitButton: { backgroundColor: '#111111', paddingVertical: 14, borderRadius: 8, alignItems: 'center', marginTop: 14 },
-  submitButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#F8FAFC",
+    padding: 20,
+    paddingBottom: 40,
+  },
+
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#111827",
+    marginTop: 10,
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginTop: 4,
+    marginBottom: 24,
+  },
+
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+
+  statCard: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    padding: 14,
+    borderRadius: 16,
+    marginHorizontal: 4,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  statValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 4,
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "600",
+    textAlign: "center",
+  },
+
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 4,
+  },
+
+  cardSubtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 16,
+  },
+
+  chart: {
+    borderRadius: 16,
+  },
+
+  spinner: {
+    marginTop: 18,
+    alignItems: "center",
+  },
+
+  reportCard: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
+    padding: 14,
+    marginTop: 18,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  reportTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#2563EB",
+    marginBottom: 8,
+  },
+
+  reportText: {
+    fontSize: 14,
+    color: "#111827",
+    lineHeight: 20,
+  },
 });
+
