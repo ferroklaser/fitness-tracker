@@ -1,8 +1,3 @@
-// 1. Header: Insights
-// 2. 3 stat cards
-// 3. AI report card
-// 4. Generate AI Progress Report button
-
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -36,31 +31,56 @@ export default function Insights() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={styles.backButton} onPress={() => router.push("/")}>
+        ← Dashboard
+      </Text>
+
       <Text style={styles.headerTitle}>Insights</Text>
       <Text style={styles.subtitle}>
         Track your progress and receive AI-powered recommendations.
       </Text>
 
-      {/* 📊 High-Fidelity Stats Row */}
+      <Text style={styles.sectionTitle}>Performance Summary</Text>
+
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>12</Text>
-          <Text style={styles.statLabel}>Workouts</Text>
+          <Text style={styles.statLabel}>This Month</Text>
+          <Text style={styles.statSubLabel}>Workouts</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={styles.statValue}>65kg</Text>
-          <Text style={styles.statLabel}>Best Lift</Text>
+          <Text style={styles.statLabel}>Bench Press</Text>
+          <Text style={styles.statSubLabel}>Personal Best</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={styles.statValue}>2100</Text>
-          <Text style={styles.statLabel}>Avg Calories</Text>
+          <Text style={styles.statLabel}>Daily Average</Text>
+          <Text style={styles.statSubLabel}>Calories</Text>
         </View>
       </View>
 
-      {/* 🧠 AI Report Action Dashboard Block */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Consistency</Text>
+
+        <View style={styles.streakContainer}>
+          <Text style={styles.streakEmoji}>🔥</Text>
+
+          <View>
+            <Text style={styles.streakTitle}>3-Day Streak</Text>
+            <Text style={styles.streakText}>
+              You have logged activity for 3 consecutive days.
+            </Text>
+          </View>
+        </View>
+      </View>
+
       <View style={styles.card}>
         <Text style={styles.cardTitle}>AI Progress Report</Text>
         <Text style={styles.cardSubtitle}>
@@ -77,14 +97,12 @@ export default function Insights() {
           onPress={handleGenerateReport}
         />
 
-        {/* Dynamic Activity Progress Spinners */}
         {loading && (
           <View style={styles.spinner}>
             <ActivityIndicator size="large" color="#2563EB" />
           </View>
         )}
 
-        {/* AI Stored Output Report Presentation Card */}
         {report && (
           <View style={styles.reportCard}>
             <Text style={styles.reportTitle}>AI Coach Summary</Text>
@@ -104,6 +122,13 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
 
+  backButton: {
+    color: "#2563EB",
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+
   headerTitle: {
     fontSize: 28,
     fontWeight: "800",
@@ -116,6 +141,13 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     marginTop: 4,
     marginBottom: 24,
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 12,
   },
 
   statsRow: {
@@ -149,6 +181,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  statSubLabel: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    marginTop: 2,
+  },
+
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 18,
@@ -162,13 +200,35 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#111827",
-    marginBottom: 4,
+    marginBottom: 8,
   },
 
   cardSubtitle: {
     fontSize: 14,
     color: "#6B7280",
     marginBottom: 16,
+  },
+
+  streakContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  streakEmoji: {
+    fontSize: 32,
+    marginRight: 12,
+  },
+
+  streakTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+  },
+
+  streakText: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginTop: 4,
   },
 
   spinner: {
