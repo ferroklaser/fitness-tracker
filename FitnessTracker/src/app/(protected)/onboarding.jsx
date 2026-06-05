@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useUser } from '@/context/UserContext'; 
+import fitnessGoalsOptions from '../../constants/fitnessGoalsOptions';
+import activityOptions from '../../constants/activityOptions';
 
 export default function Onboarding() {
   const router = useRouter();
@@ -16,21 +18,6 @@ export default function Onboarding() {
   const [targetWeight, setTargetWeight] = useState('');
   const [activityLevel, setActivityLevel] = useState('lightlyActive');
   const [selectedGoals, setSelectedGoals] = useState([]);
-
-  const fitnessGoalsOptions = [
-    { id: 'weightLoss', label: 'Weight Loss (Fat loss / Toning)' },
-    { id: 'muscleGain', label: 'Muscle Gain (Hypertrophy / Bulking)' },
-    { id: 'endurance', label: 'Improve Endurance (Run longer/faster)' },
-    { id: 'strength', label: 'Get Stronger (Strength/Powerlifting)' },
-    { id: 'health', label: 'Improve Health (General wellness / Feel better)' },
-  ];
-
-  const activityOptions = [
-    { id: 'sedentary', label: 'Sedentary', desc: 'Desk job / little to no exercise', multiplier: 1.2 },
-    { id: 'lightlyActive', label: 'Lightly Active', desc: 'Light exercise (1-2 days/week)', multiplier: 1.375 },
-    { id: 'moderatelyActive', label: 'Moderately Active', desc: 'Moderate exercise (3-4 days/week)', multiplier: 1.55 },
-    { id: 'veryActive', label: 'Very Active', desc: 'Hard labor / heavy sport (5+ days/week)', multiplier: 1.725 },
-  ];
 
   const toggleFitnessGoal = (goalId) => {
     if (selectedGoals.includes(goalId)) {
