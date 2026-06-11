@@ -55,16 +55,19 @@ const mostRecentWorkout =
 // Placeholder streak
 const currentStreak = 3;
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
     setLoading(true);
     setReport(null);
 
-    setTimeout(() => {
-      setLoading(false);
-      setReport(
-        `You completed ${uniqueSessionsThisWeek} workout session(s) this week. Your most recent workout was ${mostRecentWorkout}. You are currently on a ${currentStreak}-day streak. Keep logging consistently to build long-term progress.`
-);
-    }, 1500);
+    try {
+      const data = await fetchAIInsights()
+      setReport(data.report)
+      setRemainingReq(data.remainingReq)
+    } catch (err) {
+      setError(err.message || "An unexpected error occurred.")
+    } finally {
+      setLoading(false)
+    }
   };
 
   return (
