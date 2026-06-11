@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,28 +6,65 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
+import { router } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
+import { getWorkoutLogs } from "@/services/workoutServices";
 import MyButton from "../../components/MyButton";
 import { fetchAIInsights } from "../../util/fetchAIInsights";
 
 export default function Insights() {
+  const { user } = useAuth();
+
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
   const [remainingReq, setRemainingReq] = useState(null)
   const [error, setError] = useState(null)
 
-  const handleGenerateReport = async () => {
+  useEffect(() => {
+    const fetchWorkoutLogs = async () => {
+      if (user?.id) {
+        const { data, error } = await getWorkoutLogs(user.id);
+
+        if (!error) {
+          setLogs(data);
+        }
+      }
+    };
+
+    fetchWorkoutLogs();
+  }, [user?.id]);
+
+// Workout sessions this week
+const startOfWeek = new Date();
+startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+
+const workoutsThisWeek = logs.filter(
+  (log) => new Date(log.created_at) >= startOfWeek
+);
+
+// Count unique sessions
+const uniqueSessionsThisWeek = new Set(
+  workoutsThisWeek.map((log) => log.session_id)
+).size;
+
+// Most recent workout
+const mostRecentWorkout =
+  logs.length > 0 ? logs[0].exercise_name : "None";
+
+// Placeholder streak
+const currentStreak = 3;
+
+  const handleGenerateReport = () => {
     setLoading(true);
     setReport(null);
 
-    try {
-      const data = await fetchAIInsights()
-      setReport(data.report)
-      setRemainingReq(data.remainingReq)
-    } catch (err) {
-      setError(err.message || "An unexpected error occurred.")
-    } finally {
-      setLoading(false)
-    }
+    setTimeout(() => {
+      setLoading(false);
+      setReport(
+        `You completed ${uniqueSessionsThisWeek} workout session(s) this week. Your most recent workout was ${mostRecentWorkout}. You are currently on a ${currentStreak}-day streak. Keep logging consistently to build long-term progress.`
+);
+    }, 1500);
   };
 
   return (
@@ -48,21 +85,21 @@ export default function Insights() {
 
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>12</Text>
-          <Text style={styles.statLabel}>This Month</Text>
-          <Text style={styles.statSubLabel}>Workouts</Text>
+          <Text style={styles.statValue}>{uniqueSessionsThisWeek}</Text>
+          <Text style={styles.statLabel}>This Week</Text>
+          <Text style={styles.statSubLabel}>Workout Sessions</Text>
         </View>
 
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>65kg</Text>
-          <Text style={styles.statLabel}>Bench Press</Text>
-          <Text style={styles.statSubLabel}>Personal Best</Text>
+          <Text style={styles.statValue}>{mostRecentWorkout}</Text>
+          <Text style={styles.statLabel}>Most Recent</Text>
+          <Text style={styles.statSubLabel}>Workout</Text>
         </View>
 
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>2100</Text>
-          <Text style={styles.statLabel}>Daily Average</Text>
-          <Text style={styles.statSubLabel}>Calories</Text>
+          <Text style={styles.statValue}>{currentStreak}</Text>
+          <Text style={styles.statLabel}>Day Streak</Text>
+          <Text style={styles.statSubLabel}>Consistency</Text>
         </View>
       </View>
 
@@ -84,8 +121,7 @@ export default function Insights() {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>AI Progress Report</Text>
         <Text style={styles.cardSubtitle}>
-          Generate a personalized summary based on your workout and calorie
-          history.
+          Generate a personalized summary based on your workout history.
         </Text>
 
         <View style={styles.errorContainer}>
@@ -185,6 +221,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#9CA3AF",
     marginTop: 2,
+    textAlign: "center",
   },
 
   card: {
