@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from "@/context/AuthContext";
-import { ActionCardList } from "@/components/ActionCardList";
+import { getWorkoutLogs } from "@/services/workoutServices";
 
 export default function HomeDashboard() {
   const router = useRouter();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
 
-  // --- hardcoded local list stream just for pristine frontend display ---
-  const [logs] = useState([
-    { id: 1, name: 'Squat', details: '3 sets × 8 reps × 80 kg' },
-    { id: 2, name: 'Bench Press', details: '4 sets × 10 reps × 60 kg' }
-  ]);
+  // --- fetch workout logs from Supabase ---
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    const fetchWorkoutLogs = async () => {
+      if (user?.id) {
+        const { data, error } = await getWorkoutLogs(user.id);
+        if (!error) {
+          setLogs(data);
+        }
+      }
+    };
+
+    fetchWorkoutLogs();
+  }, [user?.id]);
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -45,7 +55,7 @@ export default function HomeDashboard() {
       <View style={styles.statsContainer}>
         <View style={styles.statBox}>
           <Text style={styles.statNumber}>{logs.length}</Text>
-          <Text style={styles.statLabel}>Logs Today</Text>
+          <Text style={styles.statLabel}>Today's Exercises</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statNumber}>—</Text>
@@ -91,16 +101,23 @@ export default function HomeDashboard() {
       </TouchableOpacity>
 
       {/* 📋 Stored Logs Output Ledger */}
-      <Text style={styles.sectionTitle}>Today's Ledger</Text>
-      {logs.map((item) => (
-        <View key={item.id} style={styles.historyItem}>
-          <Text style={styles.itemTitle}>{item.name}</Text>
-          <Text style={styles.itemDetails}>{item.details}</Text>
-        </View>
-      ))}
-    </ScrollView>
-  );
-}
+      <Text style={styles.sectionTitle}>Recent Workouts</Text>
+
+      {logs.length === 0 ? (
+        <Text style={styles.emptyText}>No workouts logged yet.</Text>
+      ) : (
+        logs.map((item) => (
+          <View key={item.id} style={styles.historyItem}>
+            <Text style={styles.itemTitle}>{item.exercise_name}</Text>
+            <Text style={styles.itemDetails}>
+              {item.sets} sets × {item.reps} reps × {item.weight} kg
+            </Text>
+          </View>
+        ))
+      )}
+          </ScrollView>
+        );
+      }
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: '#FAFAFA', padding: 20, paddingVertical: 32 },
@@ -128,4 +145,5 @@ const styles = StyleSheet.create({
   itemTitle: { fontSize: 14, fontWeight: '700', color: '#111' },
   itemDetails: { fontSize: 13, color: '#666', fontWeight: '500' },
   historyItem: { backgroundColor: '#FFF', borderRadius: 10, padding: 14, borderWidth: 1, borderColor: '#EAEAEA', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  emptyText: { color: '#999', fontSize: 13, textAlign: 'center', marginTop: 10 },
 });

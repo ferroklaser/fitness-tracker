@@ -41,7 +41,7 @@ CREATE TABLE public.profiles (
     body_fat NUMERIC(3, 1),
     selected_goals TEXT[] NOT NULL DEFAULT '{}',
     computed_calories INT NOT NULL
-)
+);
 
 CREATE INDEX idx_workout_logs_user_date ON public.workout_logs(user_id, created_at DESC);
 CREATE INDEX idx_nutrition_logs_user_date ON public.nutrition_logs(user_id, created_at DESC);

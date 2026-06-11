@@ -10,6 +10,21 @@
 
 import { supabase } from "../lib/supabase";
 
+// Create a new workout session
+export async function createWorkoutSession(userId) {
+  const { data, error } = await supabase
+    .from("workout_sessions")
+    .insert([
+      {
+        user_id: userId,
+      },
+    ])
+    .select()
+    .single();
+
+  return { data, error };
+}
+
 // Read all workout records for a user
 export async function getWorkoutLogs(userId) {
   const { data, error } = await supabase
