@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getWorkoutLogs } from "@/services/workoutServices";
 import MyButton from "../../components/MyButton";
 import { fetchAIInsights } from "../../util/fetchAIInsights";
+import Markdown from 'react-native-markdown-display';
 
 export default function Insights() {
   const { user } = useAuth();
@@ -145,7 +146,7 @@ const currentStreak = 3;
         {report && (
           <View style={styles.reportCard}>
             <Text style={styles.reportTitle}>AI Coach Summary</Text>
-            <Text style={styles.reportText}>{report}</Text>
+            <Markdown>{report}</Markdown>
           </View>
         )}
       </View>
