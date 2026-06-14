@@ -75,10 +75,9 @@ export default function HomeDashboard() {
         style={[styles.menuCard, styles.heroMenuCard]} 
         onPress={() => router.push('/workout/active')}
       >
-        <Text style={styles.menuIcon}>🏋️‍♂️</Text>
-        <View style={styles.menuTextDetails}>
-          <Text style={styles.menuCardTitle}>Start Empty Workout</Text>
-          <Text style={styles.menuCardDesc}>Log custom tracking metrics on the fly</Text>
+        <View style={styles.menuLeftSection}>
+          <Text style={styles.menuIcon}>🏋️‍♂️</Text>
+          <Text style={styles.menuCardTitle}>Start New Workout</Text>
         </View>
       </TouchableOpacity>
 

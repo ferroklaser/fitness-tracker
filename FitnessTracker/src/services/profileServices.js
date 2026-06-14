@@ -1,21 +1,22 @@
 import { supabase } from "../lib/supabase";
 
-// fetching user data
+// Fetch user profile — returns null if no profile exists yet (new user)
 export async function getUserProfile(userId) {
     const { data, error } = await supabase
         .from("profiles")
         .select()
         .eq('user_id', userId)
-        .single()
-    
-    if (error) {
-        throw new Error(`Failed to get profile for ${userId}`, { cause : error })
+        .single();
+
+    // PGRST116 = no rows found — not a real error, just a new user
+    if (error && error.code !== 'PGRST116') {
+        throw new Error(`Failed to get profile for ${userId}`, { cause: error });
     }
 
-    return { data }
+    return { data: data ?? null };
 }
 
-// creating and updating user data
+// Create or update user profile
 export async function editUserProfile(userId, profileData) {
     const mappedData = {
         user_id: userId,
@@ -25,18 +26,23 @@ export async function editUserProfile(userId, profileData) {
         age: parseInt(profileData.age, 10),
         weight: parseFloat(profileData.weight),
         height: parseFloat(profileData.height),
-        target_weight: parseFloat(profileData.targetWeight),
-        body_fat: profileData.bodyFat ? parseFloat(profileData.bodyFat) : null,
-        selected_goals: profileData.selectedGoals,
-        computed_calories: parseInt(profileData.computedCalories, 10)
-    }
+        targetweight: parseFloat(profileData.targetWeight),
+        bodyfat: profileData.bodyFat ? parseFloat(profileData.bodyFat) : null,
+        selectedgoals: profileData.selectedGoals,
+        computedcalories: parseInt(profileData.computedCalories, 10),
+    };
 
     const { error } = await supabase
         .from("profiles")
-        .upsert(mappedData)
+        .upsert(mappedData, { onConflict: 'user_id' });
 
-    if (error) {
-        throw new Error(`Failed to edit profile for ${userId}`, { cause : error })
+    // if (error) {
+    //     throw new Error(`Failed to edit profile for ${userId}`, { cause: error });
+    // }
+        if (error) {
+        throw new Error(
+            `Failed to edit profile for ${userId}: ${error.message}`
+        )
     }
 }
 
