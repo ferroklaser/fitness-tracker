@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { useRouter } from 'expo-router'; // 👈 1. Import router wrapper
+import { useRouter } from 'expo-router'; 
 import { useUser } from '@/context/UserContext'; 
 import { useAuth } from '@/context/AuthContext'; 
 
 export default function Profile() {
-  const router = useRouter(); // 👈 2. Initialize navigation hook
+  const router = useRouter(); 
   const { profile, updateProfile } = useUser(); 
   const { user, signOut } = useAuth(); 
 
@@ -28,56 +28,26 @@ export default function Profile() {
       return;
     }
 
-    let wNum = parseFloat(editedWeight);
-    let hNum = parseFloat(editedHeight);
-    let aNum = parseInt(editedAge);
-    
-    let bmr = (10 * wNum) + (6.25 * hNum) - (5 * aNum);
-    bmr = profile.gender === 'male' ? bmr + 5 : bmr - 161;
-
-    const activityMultipliers = {
-      sedentary: 1.2,
-      lightlyActive: 1.375,
-      moderatelyActive: 1.55,
-      veryActive: 1.725
-    };
-    const multiplier = activityMultipliers[profile.activityLevel] || 1.375;
-    let newCalories = Math.round(bmr * multiplier);
-
-    (profile.selectedGoals || []).forEach((goalId) => {
-      if (goalId === 'muscleGain') newCalories += 350;
-      if (goalId === 'weightLoss') newCalories -= 400;
-      if (goalId === 'strength') newCalories += 150;
-      if (goalId === 'endurance') newCalories += 200;
-    });
-
+    // Simplified update context: Calorie math stripped out completely
     updateProfile({
       age: editedAge,
       weight: editedWeight,
-      height: editedHeight,
-      computedCalories: newCalories
+      height: editedHeight
     });
 
     setIsEditing(false); 
-    Alert.alert("🎯 Metrics Updated", "Your biometrics and daily calorie targets have been recalculated!");
+    Alert.alert("🎯 Metrics Updated", "Your biometrics have been successfully updated!");
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       
-      {/* 🧭 NEW: Top Navigation Row Back To Index Dashboard */}
+      {/* 🧭 Top Navigation Row Back To Index Dashboard */}
       <TouchableOpacity style={styles.backButtonRow} onPress={() => router.replace('/')}>
         <Text style={styles.backButtonText}>← Back to Dashboard</Text>
       </TouchableOpacity>
 
       <Text style={styles.headerTitle}>User Profile</Text>
-      <Text style={styles.subtitle}>View or calibrate your verified account profile variables below.</Text>
-
-      {/* Calorific Highlight Card */}
-      <View style={styles.calorificHighlightCard}>
-        <Text style={styles.cardLabel}>Calculated Energy Intake Blueprint</Text>
-        <Text style={styles.calorieNumber}>{profile.computedCalories || 0} kcal / day</Text>
-      </View>
 
       {/* Dynamic Profile Card */}
       <View style={styles.card}>
@@ -174,11 +144,7 @@ const styles = StyleSheet.create({
   backButtonRow: { alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 4, marginBottom: 16 },
   backButtonText: { color: '#666', fontSize: 13, fontWeight: '700' },
 
-  headerTitle: { fontSize: 26, fontWeight: '800', color: '#111' },
-  subtitle: { fontSize: 13, color: '#888', marginTop: 4, marginBottom: 24 },
-  calorificHighlightCard: { backgroundColor: '#111', borderRadius: 12, padding: 18, marginBottom: 16 },
-  cardLabel: { color: '#AAA', fontSize: 11, fontWeight: '600', textTransform: 'uppercase' },
-  calorieNumber: { color: '#FFF', fontSize: 22, fontWeight: '800', marginTop: 4 },
+  headerTitle: { fontSize: 26, fontWeight: '800', color: '#111', marginBottom: 24 }, // Added margin to space out since subtitle is gone
   card: { backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 4, borderWidth: 1, borderColor: '#EAEAEA', marginBottom: 16 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#F5F5F5', gap: 16 },
   label: { fontSize: 13, color: '#666', fontWeight: '500', flex: 1 },
