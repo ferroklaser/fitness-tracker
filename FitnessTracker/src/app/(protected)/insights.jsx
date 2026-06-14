@@ -66,6 +66,7 @@ const currentStreak = 3;
       setRemainingReq(data.remainingReq)
     } catch (err) {
       setError(err.message || "An unexpected error occurred.")
+      console.error("Error fetching AI insights:", err)
     } finally {
       setLoading(false)
     }
