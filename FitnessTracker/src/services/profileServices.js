@@ -21,19 +21,21 @@ export async function editUserProfile(userId, profileData) {
         user_id: userId,
         gender: profileData.gender,
         experience: profileData.experience,
-        activity_level: profileData.activityLevel,
+        activitylevel: profileData.activityLevel,
         age: parseInt(profileData.age, 10),
         weight: parseFloat(profileData.weight),
         height: parseFloat(profileData.height),
-        target_weight: parseFloat(profileData.targetWeight),
-        body_fat: profileData.bodyFat ? parseFloat(profileData.bodyFat) : null,
-        selected_goals: profileData.selectedGoals,
-        computed_calories: parseInt(profileData.computedCalories, 10)
+        targetweight: parseFloat(profileData.targetWeight),
+        bodyfat: profileData.bodyFat ? parseFloat(profileData.bodyFat) : null,
+        selectedgoals: profileData.selectedGoals,
+        computedcalories: parseInt(profileData.computedCalories, 10)
     }
 
     const { error } = await supabase
         .from("profiles")
-        .upsert(mappedData)
+        .upsert(mappedData, { onConflict: 'user_id' })
+    
+    console.log(error)
 
     if (error) {
         throw new Error(`Failed to edit profile for ${userId}`, { cause : error })

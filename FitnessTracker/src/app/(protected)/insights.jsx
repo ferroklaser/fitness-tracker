@@ -56,20 +56,20 @@ const mostRecentWorkout =
 // Placeholder streak
 const currentStreak = 3;
 
-  const handleGenerateReport = async () => {
-    setLoading(true);
-    setReport(null);
+const handleGenerateReport = async () => {
+  setLoading(true);
+  setReport(null);
 
-    try {
-      const data = await fetchAIInsights()
-      setReport(data.report)
-      setRemainingReq(data.remainingReq)
-    } catch (err) {
-      setError(err.message || "An unexpected error occurred.")
-    } finally {
-      setLoading(false)
-    }
-  };
+  try {
+    const data = await fetchAIInsights()
+    setReport(data.report)
+    setRemainingReq(data.remainingReq)
+  } catch (err) {
+    setError(err.message || "An unexpected error occurred.")
+  } finally {
+    setLoading(false)
+  }
+};
 
   return (
     <ScrollView
