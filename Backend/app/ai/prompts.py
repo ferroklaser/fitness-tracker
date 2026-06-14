@@ -40,14 +40,11 @@ Give one brief caution about consistency, recovery, logging quality, exercise ba
 """.strip()
 
 
-def build_user_prompt(workouts: list[dict], calories: list[dict]) -> str:
+def build_user_prompt(workouts: list[dict]) -> str:
     return f"""
 Recent workout logs:
 {workouts or "No workout logs found."}
 
-Recent calorie logs:
-{calories or "No calorie logs found."}
-
 Create an AI progress report for this user. Refer to exercises, weights, reps,
-dates, and calorie totals only when they appear in the logs above.
+and dates only when they appear in the logs above.
 """.strip()

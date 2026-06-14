@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from collections import defaultdict, deque
@@ -9,11 +10,11 @@ from supabase import Client, create_client
 
 from app.ai.engine import AIEngineError, generate_progress_report
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["ai"])
 security = HTTPBearer()
 rate_limit_hits: dict[str, deque[float]] = defaultdict(deque)
-
 
 RATE_LIMIT_REQUESTS = int(os.getenv("AI_RATE_LIMIT_REQUESTS", "15"))
 RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("AI_RATE_LIMIT_WINDOW_SECONDS", "86400"))
@@ -22,6 +23,7 @@ RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("AI_RATE_LIMIT_WINDOW_SECONDS", "86400
 class InsightResponse(BaseModel):
     report: str
     remaining_requests: int
+
 
 def get_supabase() -> Client:
     url = os.getenv("EXPO_PUBLIC_SUPABASE_URL")
@@ -37,49 +39,40 @@ def get_supabase() -> Client:
 
 
 async def get_user_id_from_token(
-    supabase: Client,
-    # authorization: str | None,
-    token: str,
+    supabase: Client, 
+    token: str
 ) -> str:
     try:
         user_response = supabase.auth.get_user(token)
     except Exception as exc:
-        raise HTTPException(status_code=401, detail="Invalid Supabase token.") from exc
+        logger.error("Supabase get_user failed: %s", exc)
+        raise HTTPException(status_code=401, detail=f"Invalid Supabase token: {exc}") from exc
 
     user = getattr(user_response, "user", None)
     user_id = getattr(user, "id", None)
     if not user_id:
+        logger.error("No user_id in Supabase response: %s", user_response)
         raise HTTPException(status_code=401, detail="Could not verify user.")
 
     return user_id
 
 
-def fetch_recent_logs(supabase: Client, user_id: str) -> tuple[list[dict], list[dict]]:
+def fetch_recent_logs(supabase: Client, user_id: str) -> list[dict]:
     try:
         workouts = (
             supabase.table("workout_logs")
-             .select("exercise_name, sets, reps, weight, created_at")
+            .select("exercise_name, sets, reps, weight, created_at")
             .eq("user_id", user_id)
             .order("created_at", desc=True)
             .limit(20)
             .execute()
             .data
         )
-
-
-        calories = (
-            supabase.table("nutrition_logs")
-            .select("calories, meal_type, food_name, created_at")
-            .eq("user_id", user_id)
-            .order("created_at", desc=True)
-            .limit(14)
-            .execute()
-            .data
-        )
     except Exception as exc:
+        logger.error("Supabase table query failed: %s", exc)
         raise HTTPException(status_code=502, detail="Could not load Supabase logs.") from exc
 
-    return workouts or [], calories or []
+    return workouts or []
 
 
 def enforce_ai_rate_limit(user_id: str) -> int:
@@ -92,7 +85,7 @@ def enforce_ai_rate_limit(user_id: str) -> int:
 
     if len(user_hits) >= RATE_LIMIT_REQUESTS:
         retry_after = max(
-            1,
+            1, 
             int(RATE_LIMIT_WINDOW_SECONDS - (now - user_hits[0]))
         )
 
@@ -103,8 +96,8 @@ def enforce_ai_rate_limit(user_id: str) -> int:
         )
 
     user_hits.append(now)
-
     return RATE_LIMIT_REQUESTS - len(user_hits)
+
 
 @router.post("/insights", response_model=InsightResponse)
 async def create_insights(
@@ -114,76 +107,26 @@ async def create_insights(
     token = credentials.credentials
 
     user_id = await get_user_id_from_token(supabase, token=token)
-
     supabase.postgrest.auth(token)
 
-    workouts, calories = fetch_recent_logs(supabase, user_id)
-
+    workouts = fetch_recent_logs(supabase, user_id)
     remaining = enforce_ai_rate_limit(user_id)
 
-    if not workouts and not calories:
+    if not workouts:
         return InsightResponse(
             report=(
-                "Not enough workout or calorie data yet. "
-                "Log some workouts or calorie entries first, then try again."
+                "Not enough workout data yet. "
+                "Log some workouts first, then try again."
             ),
             remaining_requests=remaining,
         )
 
     try:
-        report = await generate_progress_report(workouts=workouts, calories=calories)
+        report = await generate_progress_report(workouts=workouts)
     except AIEngineError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     except Exception as exc:
-        # raise HTTPException(status_code=502, detail="Could not generate AI report.") from exc
-        print(exc)
+        logger.error("Unexpected error generating report: %s", exc)
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
-    return InsightResponse(
-        report=report,
-        remaining_requests=remaining,
-    )
-# from fastapi import APIRouter, Depends, HTTPException, Request # 👈 Import Request
-
-
-# @router.post("/insights", response_model=InsightResponse)
-# async def create_insights(
-#     request: Request, # 👈 Inject the raw request object directly
-# ) -> InsightResponse:
-#     supabase = get_supabase()
-    
-#     # 1. Grab the Authorization header manually
-#     auth_header = request.headers.get("Authorization")
-#     print("RAW AUTH HEADER:", auth_header) # This WILL print now!
-
-#     if not auth_header or not auth_header.startswith("Bearer "):
-#         raise HTTPException(
-#             status_code=401, 
-#             detail="Missing or malformed Authorization header."
-#         )
-
-#     # 2. Extract the exact token string
-#     token = auth_header.split(" ")[1]
-#     print("EXTRACTED TOKEN:", token)
-
-#     # 3. Authenticate the user through Supabase
-#     user_id = await get_user_id_from_token(supabase, token=token)
-    
-#     # ... rest of your code remains exactly the same ...
-#     supabase.postgrest.auth(token)
-#     workouts, calories = fetch_recent_logs(supabase, user_id)
-#     remaining = enforce_ai_rate_limit(user_id)
-
-#     if not workouts and not calories:
-#         return InsightResponse(
-#             report="Not enough workout or calorie data yet.",
-#             remaining_requests=remaining,
-#         )
-
-#     try:
-#         report = await generate_progress_report(workouts=workouts, calories=calories)
-#     except Exception as exc:
-#         print("AI Engine Error:", exc)
-#         raise HTTPException(status_code=502, detail=str(exc))
-
-#     return InsightResponse(report=report, remaining_requests=remaining)
+    return InsightResponse(report=report, remaining_requests=remaining)
