@@ -3,6 +3,9 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-nati
 import { useRouter } from 'expo-router';
 import { useAuth } from "@/context/AuthContext";
 import { getWorkoutLogs } from "@/services/workoutServices";
+import LogCard from "@/components/LogCard"
+import { Alert } from 'react-native';
+import { deleteWorkoutLog } from '@/services/workoutServices';
 
 export default function HomeDashboard() {
   const router = useRouter();
@@ -29,6 +32,17 @@ export default function HomeDashboard() {
     month: 'short',
     day: 'numeric',
   });
+
+  const handleDeleteLog = async (id) => {
+    const { error } = await deleteWorkoutLog(id);
+
+    if (error) {
+      console.error("Error deleting log:", error.message);
+      return;
+    }
+
+    setLogs((currentLogs) => currentLogs.filter((log) => log.id !== id));
+};
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -107,12 +121,7 @@ export default function HomeDashboard() {
         <Text style={styles.emptyText}>No workouts logged yet.</Text>
       ) : (
         logs.map((item) => (
-          <View key={item.id} style={styles.historyItem}>
-            <Text style={styles.itemTitle}>{item.exercise_name}</Text>
-            <Text style={styles.itemDetails}>
-              {item.sets} sets × {item.reps} reps × {item.weight} kg
-            </Text>
-          </View>
+          <LogCard key={item.id} item={item} onDelete={handleDeleteLog}/>
         ))
       )}
           </ScrollView>
@@ -142,8 +151,5 @@ const styles = StyleSheet.create({
   menuCardDesc: { fontSize: 12, color: '#666666', marginTop: 2 },
 
   sectionTitle: { fontSize: 11, fontWeight: '800', color: '#888', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, marginTop: 20, paddingLeft: 4 },
-  itemTitle: { fontSize: 14, fontWeight: '700', color: '#111' },
-  itemDetails: { fontSize: 13, color: '#666', fontWeight: '500' },
-  historyItem: { backgroundColor: '#FFF', borderRadius: 10, padding: 14, borderWidth: 1, borderColor: '#EAEAEA', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   emptyText: { color: '#999', fontSize: 13, textAlign: 'center', marginTop: 10 },
 });
