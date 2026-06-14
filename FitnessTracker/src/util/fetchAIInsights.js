@@ -26,6 +26,7 @@ export async function fetchAIInsights() {
 
     if (!response.ok) {
         throw new Error(json.detail || "Failed to generate report.")
+        console.error("API Error:", json)
     }
 
     return json

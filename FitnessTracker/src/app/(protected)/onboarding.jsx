@@ -27,7 +27,7 @@ export default function Onboarding() {
     }
   };
 
-  const handleSaveGoals = () => {
+  const handleSaveGoals = async () => {
     if (!age || !weight || !height || !targetWeight) {
       if (Platform.OS === 'web') {
         window.alert("Missing Fields: Please complete all mandatory parameters.");
@@ -53,8 +53,9 @@ export default function Onboarding() {
     let bmr = (10 * wNum) + (6.25 * hNum) - (5 * aNum);
     bmr = gender === 'male' ? bmr + 5 : bmr - 161;
 
-    const activeObj = activityOptions.find(opt => opt.id === activityLevel) || activityOptions[1];
-    let baseCalories = Math.round(bmr * activeObj.multiplier);
+    const activeObj = activityOptions?.find(opt => opt.id === activityLevel) || activityOptions?.[1];
+    const multiplier = activeObj && typeof activeObj.multiplier === 'number' ? activeObj.multiplier : 1.375;
+    let baseCalories = Math.round(bmr * multiplier);
 
     selectedGoals.forEach((goalId) => {
       if (goalId === 'muscleGain') baseCalories += 350;
@@ -63,8 +64,7 @@ export default function Onboarding() {
       if (goalId === 'endurance') baseCalories += 200;
     });
 
-    // Save directly to Context RAM
-    updateProfile({
+    await updateProfile({
       gender,
       age,
       weight,
@@ -77,7 +77,6 @@ export default function Onboarding() {
       computedCalories: baseCalories
     });
 
-    // Safe Execution Sync Delay
     setTimeout(() => {
       if (Platform.OS === 'web') {
         window.alert(`🎯 Profile Configured!\nDaily energy intake target established at ${baseCalories} kcal.`);
@@ -95,7 +94,6 @@ export default function Onboarding() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.headerTitle}>Establish Goals</Text>
-      <Text style={styles.subtitle}>Configure your profile statistics to calibrate our tracking engines.</Text>
 
       <View style={styles.card}>
         <Text style={styles.labelTitle}>Biological Gender</Text>
@@ -125,16 +123,24 @@ export default function Onboarding() {
 
         <Text style={styles.labelTitle}>Daily Activity Level</Text>
         <View style={styles.activityGroupStack}>
-          {activityOptions.map((option) => {
+          {(activityOptions || []).map((option) => {
             const isActive = activityLevel === option.id;
+            
+            // Inline check to clean up description texts dynamically
+            let displayDesc = option.desc;
+            if (option.id === 'sedentary') displayDesc = displayDesc?.replace("Log custom tracking metrics on the fly", "")?.replace(/^[,\s]+|[,\s]+$/g, "");
+            if (option.id === 'lightlyActive') displayDesc = displayDesc?.replace("custom telemetry...", "")?.replace(/^[,\s]+|[,\s]+$/g, "");
+            if (option.id === 'veryActive') displayDesc = displayDesc?.replace("run your preset custom training splits", "")?.replace(/^[,\s]+|[,\s]+$/g, "");
+
             return (
               <TouchableOpacity key={option.id} style={[styles.activityCardButton, isActive && styles.activityCardButtonActive]} onPress={() => setActivityLevel(option.id)}>
-                <View style={styles.activityTextContainer}>
-                  <Text style={[styles.activityLabelText, isActive && styles.activityLabelTextActive]}>{option.label}</Text>
-                  <Text style={styles.activityDescText}>{option.desc}</Text>
-                </View>
                 <View style={[styles.radioIndicator, isActive && styles.radioIndicatorActive]}>
                   {isActive && <View style={styles.radioInnerCircle} />}
+                </View>
+                
+                <View style={styles.activityTextContainer}>
+                  <Text style={[styles.activityLabelText, isActive && styles.activityLabelTextActive]}>{option.label}</Text>
+                  {displayDesc ? <Text style={styles.activityDescText}>{displayDesc}</Text> : null}
                 </View>
               </TouchableOpacity>
             );
@@ -143,7 +149,7 @@ export default function Onboarding() {
 
         <Text style={styles.labelTitle}>Fitness Path Targets (Select Multiple)</Text>
         <View style={styles.checkboxGroupStack}>
-          {fitnessGoalsOptions.map((option) => {
+          {(fitnessGoalsOptions || []).map((option) => {
             const isSelected = selectedGoals.includes(option.id);
             return (
               <TouchableOpacity key={option.id} style={[styles.checkboxRowButton, isSelected && styles.checkboxRowButtonActive]} onPress={() => toggleFitnessGoal(option.id)}>
@@ -169,7 +175,7 @@ export default function Onboarding() {
         <TextInput style={styles.input} placeholder="Desired Weight Target (kg)" keyboardType="numeric" value={targetWeight} onChangeText={setTargetWeight} />
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSaveGoals}>
-          <Text style={styles.submitButtonText}>Save & Compute Calorie Blueprint</Text>
+          <Text style={styles.submitButtonText}>Save and Proceed</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -178,8 +184,7 @@ export default function Onboarding() {
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: '#FAFAFA', padding: 20, paddingVertical: 32 },
-  headerTitle: { fontSize: 26, fontWeight: '800', color: '#111111' },
-  subtitle: { fontSize: 13, color: '#888888', marginTop: 4, marginBottom: 20, lineHeight: 18 },
+  headerTitle: { fontSize: 26, fontWeight: '800', color: '#111111', marginBottom: 20 },
   card: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: '#EAEAEA' },
   sectionHeading: { fontSize: 11, fontWeight: '800', color: '#888888', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 },
   labelTitle: { fontSize: 12, fontWeight: '700', color: '#444444', marginBottom: 8, marginTop: 10 },
@@ -191,13 +196,13 @@ const styles = StyleSheet.create({
   toggleButtonText: { fontSize: 11, color: '#666666', fontWeight: '600' },
   toggleButtonTextActive: { color: '#FFFFFF', fontWeight: '700' },
   activityGroupStack: { marginBottom: 14 },
-  activityCardButton: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: '#EAEAEA', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginBottom: 6 },
+  activityCardButton: { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#F5F5F5', borderWidth: 1, borderColor: '#EAEAEA', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginBottom: 6 },
   activityCardButtonActive: { backgroundColor: '#F8FAFC', borderColor: '#111111', borderWidth: 1.5 },
-  activityTextContainer: { flex: 0.9 },
+  activityTextContainer: { flex: 1 },
   activityLabelText: { fontSize: 13, fontWeight: '600', color: '#334155' },
   activityLabelTextActive: { color: '#111111', fontWeight: '700' },
   activityDescText: { fontSize: 11, color: '#64748B', marginTop: 2 },
-  radioIndicator: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: '#CBD5E1', backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' },
+  radioIndicator: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: '#CBD5E1', backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   radioIndicatorActive: { borderColor: '#111111' },
   radioInnerCircle: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#111111' },
   checkboxGroupStack: { marginBottom: 12 },

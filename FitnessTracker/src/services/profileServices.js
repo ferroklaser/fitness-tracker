@@ -22,7 +22,7 @@ export async function editUserProfile(userId, profileData) {
         user_id: userId,
         gender: profileData.gender,
         experience: profileData.experience,
-        activity_level: profileData.activityLevel,
+        activitylevel: profileData.activityLevel,
         age: parseInt(profileData.age, 10),
         weight: parseFloat(profileData.weight),
         height: parseFloat(profileData.height),

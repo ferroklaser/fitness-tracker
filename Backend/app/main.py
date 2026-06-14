@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.endpoints import router as api_router
 
 
-# Run with `uvicorn main:app --reload`
+# Run with `python3 -m uvicorn main:app --reload`
 
 load_dotenv()
 

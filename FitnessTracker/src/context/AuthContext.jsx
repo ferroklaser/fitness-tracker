@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { editUserProfile } from "@/services/profileServices";
+import { DEFAULT_PROFILE } from "@/constants/profile"
 
 const AuthContext = createContext({})
 
@@ -25,6 +27,7 @@ export const AuthProvider = ({ children }) => {
     }, [])
 
     const signUp = async (email, password) => {
+
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password
@@ -32,8 +35,16 @@ export const AuthProvider = ({ children }) => {
 
         if (error) {
             alert("Sign up failed")
-            console.log("User sign up failed", error.message)
+            console.error("User sign up failed:", error)
             return null
+        }
+
+        if (data?.user) {
+            try {
+                await editUserProfile(data.user.id, DEFAULT_PROFILE)
+            } catch (err) {
+                console.error("New user creation failed:", err)
+            }
         }
 
         return data
