@@ -23,7 +23,7 @@ explain what additional data the user should track.
 Return the report in exactly this structure:
 
 1. Progress Snapshot
-One short paragraph describing the recent trend. Plot a graph to show the progress too.
+One short paragraph describing the recent trend. 
 
 2. Next Workout Move
 One specific suggestion for the user's next workout.

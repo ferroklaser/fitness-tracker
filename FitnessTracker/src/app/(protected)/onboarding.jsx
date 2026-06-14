@@ -27,7 +27,7 @@ export default function Onboarding() {
     }
   };
 
-  const handleSaveGoals = () => {
+  const handleSaveGoals = async () => {
     if (!age || !weight || !height || !targetWeight) {
       if (Platform.OS === 'web') {
         window.alert("Missing Fields: Please complete all mandatory parameters.");
@@ -64,7 +64,7 @@ export default function Onboarding() {
     });
 
     // Save directly to Context RAM
-    updateProfile({
+    await updateProfile({
       gender,
       age,
       weight,
