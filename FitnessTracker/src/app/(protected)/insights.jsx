@@ -54,11 +54,11 @@ function SimpleLineChart({ data, labels, width, height }) {
   return (
     <Svg width={width} height={height}>
       {/* Y-axis gridlines + labels */}
-      {yTicks.map((tick) => {
+      {yTicks.map((tick, i) => {
         const y = paddingTop + chartH - ((tick - minVal) / range) * chartH;
         return (
           <Line
-            key={tick}
+            key={`grid-${i}`}
             x1={paddingLeft}
             y1={y}
             x2={width - paddingRight}
@@ -68,11 +68,11 @@ function SimpleLineChart({ data, labels, width, height }) {
           />
         );
       })}
-      {yTicks.map((tick) => {
+      {yTicks.map((tick, i) => {
         const y = paddingTop + chartH - ((tick - minVal) / range) * chartH;
         return (
           <SvgText
-            key={`lbl-${tick}`}
+            key={`lbl-${i}`}
             x={paddingLeft - 4}
             y={y + 4}
             fontSize="10"
