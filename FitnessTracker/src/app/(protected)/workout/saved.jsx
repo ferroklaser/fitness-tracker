@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../../context/AuthContext'
+import { createWorkoutSession, createWorkoutLog } from '../../../services/workoutServices'
 
 export default function SavedWorkoutsCatalog() {
   const router = useRouter();
+  const { user } = useAuth()
 
   // 📝 1. Templates Local State Array
   const [templates, setTemplates] = useState([
@@ -101,17 +104,36 @@ export default function SavedWorkoutsCatalog() {
     ]);
   };
 
-  const handleLaunchTemplate = (templateName) => {
+  const handleAutoLog = async (template) => {
     if (editingCardId) return;
 
-    Alert.alert(
-      "🚀 Initialize Session", 
-      `Would you like to populate the Live Workout Room tracker with your "${templateName || 'Custom Routine'}" split metrics?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Launch Split", onPress: () => router.replace('/workout/active') }
-      ]
-    );
+    const { data: sessionData, error: sessionError } = await createWorkoutSession(user.id);
+
+    if (sessionError || !sessionData) {
+      Alert.alert("Error", "Could not initialize workout session.");
+      return;
+    }
+    const sessionId = sessionData.id
+    const exercises = template.exercises
+
+    for (const exercise of exercises) {
+      const workoutLog = {
+        session_id: sessionId,
+        user_id: user.id,
+        exercise_name: exercise.name,
+        sets: Number(exercise.sets),
+        reps: Number(exercise.reps),
+        weight: Number(exercise.weight),
+        rest_time_seconds: null
+      }
+
+      const { data, error } = await createWorkoutLog(workoutLog);
+
+      if (error) {
+        console.error("Failed to log exercise:", exercise.name, error)
+      }
+    }
+    Alert.alert("All exercises in your saved workout has been logged")
   };
 
   const startEditing = (card) => {
@@ -385,11 +407,11 @@ export default function SavedWorkoutsCatalog() {
                       </TouchableOpacity>
                     </View>
                   ) : (
-                    <TouchableOpacity 
-                      style={styles.actionPromptRow}
-                      onPress={() => handleLaunchTemplate(item.title)}
+                      <TouchableOpacity
+                        style={styles.actionPromptRow}
+                      onPress={() => handleAutoLog(item)}
                     >
-                      <Text style={styles.promptText}>Tap here to initialize routine split</Text>
+                      <Text style={styles.promptText}>Log saved workout</Text>
                       <Text style={styles.arrowIcon}>→</Text>
                     </TouchableOpacity>
                   )}
@@ -445,7 +467,7 @@ const styles = StyleSheet.create({
   addMoveRowButtonText: { color: '#64748B', fontSize: 12, fontWeight: '700' },
   inlineTextInputTitle: { backgroundColor: '#FFF', borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 6, fontSize: 14, fontWeight: '800', color: '#111', marginBottom: 6, width: '90%' },
   inlineTextInputFocus: { backgroundColor: '#FFF', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 6, fontSize: 12, fontWeight: '500', color: '#475569', width: '90%' },
-  actionPromptRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FAFAFA', paddingHorizontal: 10, paddingVertical: 8, borderRadius: 8 },
+  actionPromptRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FAFAFA', paddingHorizontal: 10, paddingVertical: 8, borderRadius: 8, marginVertical: 3 },
   promptText: { fontSize: 11, color: '#9CA3AF', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   arrowIcon: { fontSize: 14, color: '#9CA3AF', fontWeight: 'bold' },
   editingControlFooterStack: { flexDirection: 'column', gap: 8, marginTop: 4 },
