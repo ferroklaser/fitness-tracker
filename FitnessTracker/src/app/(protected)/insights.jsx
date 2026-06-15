@@ -270,6 +270,8 @@ export default function Insights() {
   };
 
   const hasSessionData = weeklySessionsData.datasets[0].data.some((v) => v > 0);
+  const maxSessions = Math.max(...weeklySessionsData.datasets[0].data, 1);
+  const sessionSegments = Math.min(maxSessions, 5);
 
   return (
     <ScrollView
@@ -325,6 +327,7 @@ export default function Insights() {
             showValuesOnTopOfBars
             fromZero
             withInnerLines={false}
+            segments={sessionSegments}
           />
         ) : (
           <View style={styles.emptyChart}>
