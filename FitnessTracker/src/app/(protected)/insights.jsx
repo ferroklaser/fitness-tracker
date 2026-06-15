@@ -192,7 +192,6 @@ export default function Insights() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState(null);
-  const [remainingReq, setRemainingReq] = useState(null);
   const [error, setError] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
 
@@ -261,7 +260,6 @@ export default function Insights() {
     try {
       const data = await fetchAIInsights();
       setReport(data.report);
-      setRemainingReq(data.remaining_requests);
     } catch (err) {
       setError(err.message || "An unexpected error occurred.");
     } finally {
@@ -406,8 +404,9 @@ export default function Insights() {
         </Text>
 
         {error ? (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{error}</Text>
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorBannerIcon}>⚠️</Text>
+            <Text style={styles.errorBannerText}>{error}</Text>
           </View>
         ) : null}
 
@@ -415,12 +414,6 @@ export default function Insights() {
           title={loading ? "Generating Report..." : "Generate AI Progress Report"}
           onPress={handleGenerateReport}
         />
-
-        {remainingReq !== null && (
-          <Text style={styles.remainingText}>
-            {remainingReq} AI reports remaining today
-          </Text>
-        )}
 
         {loading && (
           <View style={styles.spinner}>
@@ -568,18 +561,26 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "600",
   },
-  errorContainer: {
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEF3C7",
+    borderWidth: 1,
+    borderColor: "#FCD34D",
+    borderRadius: 10,
+    padding: 12,
     marginBottom: 12,
   },
-  errorText: {
-    color: "#DC2626",
-    fontSize: 13,
+  errorBannerIcon: {
+    fontSize: 16,
+    marginRight: 8,
   },
-  remainingText: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    marginTop: 8,
-    textAlign: "center",
+  errorBannerText: {
+    flex: 1,
+    color: "#92400E",
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 18,
   },
   spinner: {
     marginTop: 18,

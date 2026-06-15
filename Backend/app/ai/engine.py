@@ -39,5 +39,20 @@ async def generate_progress_report(
 
         return content.strip()
 
+    except AIEngineError:
+        raise
     except Exception as exc:
-        raise AIEngineError(f"Gemini error: {exc}") from exc
+        err_str = str(exc)
+        if "503" in err_str or "UNAVAILABLE" in err_str:
+            raise AIEngineError(
+                "The AI service is temporarily busy. Please try again in a moment."
+            ) from exc
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+            raise AIEngineError(
+                "AI quota reached for today. Please try again tomorrow."
+            ) from exc
+        if "401" in err_str or "API_KEY" in err_str:
+            raise AIEngineError(
+                "AI service authentication failed. Please contact support."
+            ) from exc
+        raise AIEngineError("Failed to generate report. Please try again.") from exc
