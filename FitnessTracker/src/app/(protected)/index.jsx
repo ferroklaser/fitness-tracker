@@ -75,7 +75,7 @@ export default function HomeDashboard() {
       >
         <View style={styles.menuLeftSection}>
           <Text style={styles.menuIcon}>🏋️‍♂️</Text>
-          <Text style={styles.menuCardTitle}>Start Empty Workout</Text>
+          <Text style={styles.menuCardTitle}>Start New Workout</Text>
         </View>
         <Text style={styles.chevronIcon}>&gt;</Text>
       </TouchableOpacity>
