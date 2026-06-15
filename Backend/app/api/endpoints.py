@@ -75,6 +75,25 @@ def fetch_recent_logs(supabase: Client, user_id: str) -> list[dict]:
     return workouts or []
 
 
+def fetch_user_profile(supabase: Client, user_id: str) -> dict | None:
+    try:
+        result = (
+            supabase.table("profiles")
+            .select(
+                "gender, age, weight, height, target_weight, body_fat, "
+                "experience, activity_level, selected_goals, computed_calories"
+            )
+            .eq("user_id", user_id)
+            .single()
+            .execute()
+        )
+        return result.data
+    except Exception as exc:
+        # Profile is optional — don't fail the whole request if it's missing
+        logger.warning("Could not load profile for %s: %s", user_id, exc)
+        return None
+
+
 def enforce_ai_rate_limit(user_id: str) -> int:
     now = time.monotonic()
     user_hits = rate_limit_hits[user_id]
@@ -110,7 +129,10 @@ async def create_insights(
     supabase.postgrest.auth(token)
 
     workouts = fetch_recent_logs(supabase, user_id)
+    profile = fetch_user_profile(supabase, user_id)
     remaining = enforce_ai_rate_limit(user_id)
+
+    logger.info("user_id=%s | workouts=%d | profile=%s", user_id, len(workouts), profile)
 
     if not workouts:
         return InsightResponse(
@@ -122,7 +144,7 @@ async def create_insights(
         )
 
     try:
-        report = await generate_progress_report(workouts=workouts)
+        report = await generate_progress_report(workouts=workouts, profile=profile)
     except AIEngineError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     except Exception as exc:
