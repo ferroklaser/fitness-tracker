@@ -117,11 +117,8 @@ export default function ActiveWorkoutRoom() {
         <Text style={styles.backLinkText}>← Cancel Workout Session</Text>
       </TouchableOpacity>
 
-      <Text style={styles.headerTitle}>Live Workout Room</Text>
-      <Text style={styles.subtitle}>
-        Perform your sets and add metrics in real time to compile your telemetry
-        ledger.
-      </Text>
+      {/* Changed header title text below */}
+      <Text style={styles.headerTitle}>Quick Log</Text>
 
       <View style={styles.loggerCard}>
         <Text style={styles.loggerLabel}>Active Set Entry</Text>
@@ -209,7 +206,7 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: "#FAFAFA", padding: 20, paddingTop: 24 },
   backLink: { alignSelf: "flex-start", paddingVertical: 4, marginBottom: 12 },
   backLinkText: { color: "#EF4444", fontSize: 13, fontWeight: "700" },
-  headerTitle: { fontSize: 26, fontWeight: "800", color: "#111111" },
+  headerTitle: { fontSize: 26, fontWeight: "800", color: "#111111", marginBottom: 20 }, // Added marginBottom here since subtitle is gone
   subtitle: { fontSize: 13, color: "#888888", marginTop: 4, marginBottom: 20, lineHeight: 18 },
 
   loggerCard: { backgroundColor: "#FFFFFF", borderRadius: 14, padding: 18, borderWidth: 1, borderColor: "#EAEAEA", marginBottom: 16 },
