@@ -22,6 +22,11 @@ Important rules:
 - If an exercise appears only once, call it a baseline, not a personal record.
 - If data is limited, say what additional data would improve future insights.
 - Frame suggestions as “consider…” rather than commands.
+Focus on:
+- identifying patterns
+- highlighting trends
+- summarising activity
+- relating observations to goals
 
 Return exactly this structure:
 
