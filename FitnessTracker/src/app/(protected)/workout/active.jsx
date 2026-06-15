@@ -27,6 +27,8 @@ export default function ActiveWorkoutRoom() {
   const [sessionId, setSessionId] = useState(null);
   const [sessionLogs, setSessionLogs] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [addHovered, setAddHovered] = useState(false);
+  const [finishHovered, setFinishHovered] = useState(false);
 
   const handleLogSet = async () => {
     console.log("Pin button clicked");
@@ -103,11 +105,7 @@ export default function ActiveWorkoutRoom() {
   };
 
   const handleFinishWorkout = () => {
-    Alert.alert(
-      "🎉 Workout Complete!",
-      `Excellent session! You successfully saved ${sessionLogs.length} exercises to Supabase.`,
-      [{ text: "Complete", onPress: () => router.replace("/") }]
-    );
+    router.replace("/?toast=workout_saved");
   };
 
   return (
@@ -160,20 +158,24 @@ export default function ActiveWorkoutRoom() {
         </View>
 
         <TouchableOpacity
-          style={styles.submitLogButton}
+          style={[styles.submitLogButton, addHovered && styles.submitLogButtonHover]}
           onPress={handleLogSet}
           disabled={saving}
+          onMouseEnter={() => setAddHovered(true)}
+          onMouseLeave={() => setAddHovered(false)}
         >
           <Text style={styles.submitLogButtonText}>
-            {saving ? "Saving..." : "Pin Set into Session"}
+            {saving ? "Saving..." : "Add into Session"}
           </Text>
         </TouchableOpacity>
       </View>
 
       {sessionLogs.length > 0 && (
         <TouchableOpacity
-          style={styles.finishWorkoutButton}
+          style={[styles.finishWorkoutButton, finishHovered && styles.finishWorkoutButtonHover]}
           onPress={handleFinishWorkout}
+          onMouseEnter={() => setFinishHovered(true)}
+          onMouseLeave={() => setFinishHovered(false)}
         >
           <Text style={styles.finishWorkoutButtonText}>
             Save & Finish Workout Session
@@ -214,10 +216,12 @@ const styles = StyleSheet.create({
   loggerLabel: { fontSize: 11, fontWeight: "800", color: "#888", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
   inputField: { backgroundColor: "#F9F9F9", borderWidth: 1, borderColor: "#EAEAEA", borderRadius: 8, padding: 12, fontSize: 14, color: "#111", marginBottom: 10 },
   inputRow: { flexDirection: "row", marginBottom: 4 },
-  submitLogButton: { backgroundColor: "#F3F4F6", borderWidth: 1, borderColor: "#E5E7EB", paddingVertical: 12, borderRadius: 8, alignItems: "center", marginTop: 4 },
-  submitLogButtonText: { color: "#1F2937", fontSize: 14, fontWeight: "700" },
+  submitLogButton: { backgroundColor: "#2563EB", borderWidth: 1, borderColor: "#1D4ED8", paddingVertical: 12, borderRadius: 8, alignItems: "center", marginTop: 4 },
+  submitLogButtonHover: { backgroundColor: "#5574d3ff" },
+  submitLogButtonText: { color: "#FFFFFF", fontSize: 14, fontWeight: "700" },
 
   finishWorkoutButton: { backgroundColor: "#111111", paddingVertical: 14, borderRadius: 10, alignItems: "center", marginBottom: 20 },
+  finishWorkoutButtonHover: { backgroundColor: "#374151" },
   finishWorkoutButtonText: { color: "#FFFFFF", fontSize: 14, fontWeight: "700" },
 
   sectionTitle: { fontSize: 11, fontWeight: "800", color: "#888", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12, paddingLeft: 4 },

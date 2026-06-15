@@ -1,18 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from "@/context/AuthContext";
-import { getWorkoutLogs } from "@/services/workoutServices";
+import { getWorkoutLogs, deleteWorkoutLog } from '@/services/workoutServices';
 import LogCard from "@/components/LogCard"
-import { Alert } from 'react-native';
-import { deleteWorkoutLog } from '@/services/workoutServices';
 
 export default function HomeDashboard() {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { toast } = useLocalSearchParams();
 
-  // --- fetch workout logs from Supabase ---
   const [logs, setLogs] = useState([]);
+  const [toastVisible, setToastVisible] = useState(false);
+
+  useEffect(() => {
+    if (toast === "workout_saved") {
+      setToastVisible(true);
+      const timer = setTimeout(() => setToastVisible(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   useEffect(() => {
     const fetchWorkoutLogs = async () => {
@@ -46,7 +53,14 @@ export default function HomeDashboard() {
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      
+
+      {/* Toast notification */}
+      {toastVisible && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>✅ Workout saved!</Text>
+        </View>
+      )}
+
       {/* 🗓️ Header Area */}
       <View style={styles.headerRow}>
         <View>
@@ -135,4 +149,6 @@ const styles = StyleSheet.create({
 
   sectionTitle: { fontSize: 11, fontWeight: '800', color: '#888', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, marginTop: 20, paddingLeft: 4 },
   emptyText: { color: '#999', fontSize: 13, textAlign: 'center', marginTop: 10 },
+  toast: { backgroundColor: '#111827', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 16, marginBottom: 16, alignSelf: 'flex-start' },
+  toastText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
 });
