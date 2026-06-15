@@ -46,24 +46,7 @@ export default function Onboarding() {
       return;
     }
 
-    let wNum = parseFloat(weight);
-    let hNum = parseFloat(height);
-    let aNum = parseInt(age);
-    
-    let bmr = (10 * wNum) + (6.25 * hNum) - (5 * aNum);
-    bmr = gender === 'male' ? bmr + 5 : bmr - 161;
-
-    const activeObj = activityOptions?.find(opt => opt.id === activityLevel) || activityOptions?.[1];
-    const multiplier = activeObj && typeof activeObj.multiplier === 'number' ? activeObj.multiplier : 1.375;
-    let baseCalories = Math.round(bmr * multiplier);
-
-    selectedGoals.forEach((goalId) => {
-      if (goalId === 'muscleGain') baseCalories += 350;
-      if (goalId === 'weightLoss') baseCalories -= 400;
-      if (goalId === 'strength') baseCalories += 150;
-      if (goalId === 'endurance') baseCalories += 200;
-    });
-
+    // Save user profile state parameters directly without computing calories
     await updateProfile({
       gender,
       age,
@@ -73,18 +56,17 @@ export default function Onboarding() {
       experience,
       targetWeight,
       activityLevel,
-      selectedGoals,
-      computedCalories: baseCalories
+      selectedGoals
     });
 
     setTimeout(() => {
       if (Platform.OS === 'web') {
-        window.alert(`🎯 Profile Configured!\nDaily energy intake target established at ${baseCalories} kcal.`);
+        window.alert(`🎯 Profile Configured!\nYour fitness setup has been successfully saved.`);
         router.replace('/');
       } else {
         Alert.alert(
           "🎯 Profile Configured!", 
-          `Daily energy intake target established at ${baseCalories} kcal.`,
+          `Your fitness setup has been successfully saved.`,
           [{ text: "Enter Dashboard", onPress: () => router.replace('/') }]
         );
       }
@@ -125,13 +107,6 @@ export default function Onboarding() {
         <View style={styles.activityGroupStack}>
           {(activityOptions || []).map((option) => {
             const isActive = activityLevel === option.id;
-            
-            // Inline check to clean up description texts dynamically
-            let displayDesc = option.desc;
-            if (option.id === 'sedentary') displayDesc = displayDesc?.replace("Log custom tracking metrics on the fly", "")?.replace(/^[,\s]+|[,\s]+$/g, "");
-            if (option.id === 'lightlyActive') displayDesc = displayDesc?.replace("custom telemetry...", "")?.replace(/^[,\s]+|[,\s]+$/g, "");
-            if (option.id === 'veryActive') displayDesc = displayDesc?.replace("run your preset custom training splits", "")?.replace(/^[,\s]+|[,\s]+$/g, "");
-
             return (
               <TouchableOpacity key={option.id} style={[styles.activityCardButton, isActive && styles.activityCardButtonActive]} onPress={() => setActivityLevel(option.id)}>
                 <View style={[styles.radioIndicator, isActive && styles.radioIndicatorActive]}>
@@ -140,7 +115,7 @@ export default function Onboarding() {
                 
                 <View style={styles.activityTextContainer}>
                   <Text style={[styles.activityLabelText, isActive && styles.activityLabelTextActive]}>{option.label}</Text>
-                  {displayDesc ? <Text style={styles.activityDescText}>{displayDesc}</Text> : null}
+                  <Text style={styles.activityDescText}>{option.desc}</Text>
                 </View>
               </TouchableOpacity>
             );
