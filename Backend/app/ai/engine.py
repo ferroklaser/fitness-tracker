@@ -9,7 +9,10 @@ class AIEngineError(RuntimeError):
     pass
 
 
-async def generate_progress_report(workouts: list[dict]) -> str:
+async def generate_progress_report(
+    workouts: list[dict],
+    profile: dict | None = None,
+) -> str:
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key:
@@ -21,11 +24,14 @@ async def generate_progress_report(workouts: list[dict]) -> str:
     prompt = f"""
 {SYSTEM_PROMPT}
 
-{build_user_prompt(workouts)}
+{build_user_prompt(workouts, profile)}
 """
 
     try:
-        response = client.models.generate_content(model=model, contents=prompt)
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+        )
         content = response.text
 
         if not content:

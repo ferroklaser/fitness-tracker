@@ -10,7 +10,6 @@ Use only the data explicitly provided:
 - experience level
 - target weight
 - workout logs
-- calorie logs
 
 Do not invent missing data, causes, injuries, body weight changes, progress trends, or future outcomes.
 
@@ -18,7 +17,7 @@ Important rules:
 - Keep the report under 150 words.
 - Be encouraging, realistic, and concise.
 - Do not give medical advice.
-- Do not prescribe exact weights, reps, calories, or workout programmes.
+- Do not prescribe exact weights, reps, or workout programmes.
 - Do not claim progress unless there are at least two comparable logs on different dates.
 - If an exercise appears only once, call it a baseline, not a personal record.
 - If data is limited, say what additional data would improve future insights.
@@ -35,16 +34,41 @@ Explain how the user’s recent activity appears to align with their selected go
 3. Next Focus
 Give one practical area the user could consider focusing on next, based on their goals and logs.
 
-4. Watch-Out
+4. Watch-Out!
 Give one brief caution about consistency, recovery, logging quality, exercise balance, or form.
 """.strip()
 
 
-def build_user_prompt(workouts: list[dict]) -> str:
+def _format_profile(profile: dict) -> str:
+    if not profile:
+        return "No profile data available."
+
+    goals = profile.get("selected_goals") or []
+    goals_str = ", ".join(goals) if goals else "not specified"
+
+    lines = [
+        f"- Age: {profile.get('age', 'unknown')}",
+        f"- Gender: {profile.get('gender', 'unknown')}",
+        f"- Weight: {profile.get('weight', 'unknown')} kg",
+        f"- Height: {profile.get('height', 'unknown')} cm",
+        f"- Target weight: {profile.get('target_weight', 'unknown')} kg",
+        f"- Body fat: {profile.get('body_fat') or 'not provided'}%",
+        f"- Experience level: {profile.get('experience', 'unknown')}",
+        f"- Activity level: {profile.get('activity_level', 'unknown')}",
+        f"- Selected goals: {goals_str}",
+        f"- Daily calorie target: {profile.get('computed_calories', 'unknown')} kcal",
+    ]
+    return "\n".join(lines)
+
+
+def build_user_prompt(workouts: list[dict], profile: dict | None = None) -> str:
     return f"""
-Recent workout logs:
+User profile:
+{_format_profile(profile)}
+
+Recent workout logs (most recent first):
 {workouts or "No workout logs found."}
 
-Create an AI progress report for this user. Refer to exercises, weights, reps,
-and dates only when they appear in the logs above.
+Generate an AI progress report for this user. Reference the profile data when relevant.
+Only refer to exercises, weights, reps, and dates that appear in the logs above.
 """.strip()
