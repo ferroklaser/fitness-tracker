@@ -100,3 +100,5 @@ cd frontend
 npm install
 npx expo start --web
 ```
+
+***Built for the ML Empowerment Build Challenge Hackathon.***
