@@ -68,14 +68,6 @@ Operating a decoupled stack across completely different software environments in
 
 ---
 
-## 🚀 What's Next for FitInsight AI
-
-- [ ] **Web Push Notifications:** Implement browser push notifications to remind users of their historical lifting targets right before their scheduled workout times.
-- [ ] **Computer Vision Form Analysis:** Introduce computer vision capabilities, allowing users to upload a video of their exercise form directly to the web app and have Gemini analyse their mechanics against safety standards.
-- [ ] **Wearable API Integrations:** Connect third-party fitness APIs to cross-reference workout intensity with sleep and recovery data for truly holistic health insights.
-
----
-
 ## ⚙️ Getting Started
 
 ### Prerequisites
